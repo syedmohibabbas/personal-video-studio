@@ -166,3 +166,6 @@
 .sequence-clip{cursor:grab}
 .sequence-clip:active,.sequence-clip.is-dragging{cursor:grabbing;opacity:.55}
 #export-button{min-width:132px}
+
+.engine-connect{border:1px solid #353b4b;background:#151b25;color:#b9c3d3;border-radius:5px;padding:5px 8px;font:9px var(--font);cursor:pointer}
+.engine-connect:hover{border-color:#8270c7;color:#e1d9ff}
