@@ -25,9 +25,11 @@
       if (!r.ok) throw new Error();
       const d = await r.json(); state.backendOnline = true;
       $('backend-status').innerHTML = `<i class="status-dot"></i> ENGINE ${esc(String(d.status || 'ONLINE').toUpperCase())}${d.ffmpeg_available ? ' · FFMPEG READY' : ' · FFMPEG MISSING'}`;
+      render();
     } catch {
       state.backendOnline = false;
       $('backend-status').innerHTML = '<i class="status-dot offline"></i> BACKEND NOT CONNECTED';
+      render();
     }
   }
 
@@ -47,7 +49,7 @@
     $('timeline-status').textContent=count?`${count} clip${count===1?'':'s'} in sequence`:'No clips loaded';
     $('audio-track-name').textContent=state.audioFile?`♫ ${state.audioFile.name}`:'No audio imported';
     $('audio-track-name').classList.toggle('has-audio',!!state.audioFile);
-    $('export-button').disabled=!count || !state.backendOnline || state.exporting;
+    $('export-button').disabled=!count || state.exporting;
     updateInspector();
   }
   function updateInspector() {
@@ -74,7 +76,6 @@
   function selectClip(id) {
     const c=state.clips.find(x=>x.id===id); if(!c)return;
     state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); hidePreviewControls();
-    $('preview-resolution').textContent=`${c.width} × ${c.height}`;
     $('preview-hint').textContent=`CLIP ${state.clips.indexOf(c)+1} OF ${state.clips.length}`;
     video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=fmt(c.end-c.start);};
     render();
@@ -139,10 +140,11 @@
       render();
     } catch(e){toast(e.message||'Could not open project file.');}
   }
-  function openExportDialog(){if(!state.clips.length)return;if(!state.backendOnline){toast('Connect the FFmpeg engine before exporting.');return;}$('export-dialog').hidden=false;refreshExportCapabilities();}
+  function openExportDialog(){if(!state.clips.length){toast('Import at least one clip first.');return;}$('export-dialog').hidden=false;if(state.backendOnline){refreshExportCapabilities();}else{$('export-start').disabled=true;$('export-capability-note').textContent='Connect your FastAPI + FFmpeg engine using the Connect engine button below. GitHub Pages cannot render videos by itself.';}}
   function closeExportDialog(){$('export-dialog').hidden=true;}
   async function refreshExportCapabilities(){
     try{
+      if(!state.backendOnline){$('export-start').disabled=true;$('export-capability-note').textContent='Connect your FastAPI + FFmpeg engine using the Connect engine button below.';return;}
       const r=await fetch(apiUrl('/api/capabilities'));if(!r.ok)throw new Error();const caps=await r.json();state.capabilities=caps;
       const format=$('export-format'),selectedFormat=format.value;
       Array.from(format.options).forEach(o=>{const ok=!!caps.formats?.[o.value];o.disabled=!ok;o.hidden=!ok;});
@@ -172,7 +174,7 @@
       link.download=(state.projectName.trim().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'personal-video-studio')+'-export.'+ext;
       link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);closeExportDialog();toast('Sequence export is ready.');
     } catch (error) { toast(error.message || 'Sequence export failed.'); }
-    finally {state.exporting=false;$('export-button').textContent='Export sequence ↗';$('export-start').disabled=false;$('export-start').textContent='Render & download ↗';render();}
+    finally {state.exporting=false;$('export-button').textContent='Export sequence ↗';$('export-start').disabled=!state.backendOnline || !Object.values(state.capabilities?.formats||{}).some(Boolean);$('export-start').textContent='Render & download ↗';render();}
   }
   const previewAspectButtons = { landscape: $('aspect-landscape'), portrait: $('aspect-portrait') };
   function setPreviewAspect(mode) {
@@ -266,7 +268,7 @@
   $('apply-trim').onclick=applyTrim;$('remove-clip').onclick=()=>{const c=selected();if(c)removeClip(c.id);};
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
   $('export-button').onclick=openExportDialog;$('export-start').onclick=exportSequence;$('export-close').onclick=closeExportDialog;$('export-cancel').onclick=closeExportDialog;$('export-dialog').addEventListener('click',e=>{if(e.target===$('export-dialog'))closeExportDialog();});$('save-project').onclick=saveProject;
-  $('backend-connect').onclick = () => {
+  async function connectBackend() {
     const entered = prompt('Paste your FastAPI backend base URL (example: https://your-api.example.com). Leave blank to use same-origin hosting:', state.apiBase);
     if (entered === null) return;
     const raw = entered.trim();
@@ -282,9 +284,12 @@
     }
     state.apiBase = clean;
     localStorage.setItem('pvs_api_base', clean);
-    checkHealth();
-    toast(clean ? 'Backend address saved. Checking connection…' : 'Using same-origin backend.');
-  };
+    await checkHealth();
+    if(state.backendOnline && !$('export-dialog').hidden) refreshExportCapabilities();
+    toast(state.backendOnline ? 'Backend connected.' : 'Backend address saved, but the server is not responding yet.');
+  }
+  $('backend-connect').onclick = connectBackend;
+  $('export-connect-engine').onclick = () => $('backend-connect').click();
   $('load-project').onclick=()=>$('project-input').click();$('project-input').onchange=e=>{const f=e.target.files?.[0];if(f)loadProject(f);e.target.value='';};
   $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;state.projectName='Untitled Project';state.previewAspect='landscape';setPreviewAspect('landscape');if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;state.audioVolume=.35;$('audio-volume').value=35;$('audio-volume-value').textContent='35%';video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('project-name').textContent=state.projectName;$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
@@ -324,8 +329,6 @@
     event.currentTarget.blur();
   };
   video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=fmt(Math.max(0,video.currentTime-c.start));if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
-  $('jump-start').onclick=()=>{const c=selected();if(c)video.currentTime=c.start;};
-  $('jump-end').onclick=()=>{const c=selected();if(c)video.currentTime=c.end;};
   function stepClip(delta){const i=state.clips.findIndex(c=>c.id===state.selectedId),c=state.clips[i+delta];if(c)selectClip(c.id);}
   $('previous-clip').onclick=()=>stepClip(-1);$('next-clip').onclick=()=>stepClip(1);
   $('fit-timeline').onclick=()=>toast('Timeline fitted to the current sequence.');
