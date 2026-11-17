@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0d12">
-  <title>Personal Video Studio — v0.4</title>
+  <title>Personal Video Studio — v0.5</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
@@ -11,7 +11,7 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.4</span></a>
+    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.5</span></a>
     <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span><button class="rename-project-button" id="rename-project" type="button" title="Rename project" aria-label="Rename project">✎</button></div>
     <div class="top-actions">
       <button class="button button-quiet" id="new-project">New</button>
@@ -107,6 +107,30 @@
             <button class="button button-danger" id="remove-clip">Remove clip</button>
           </div>
           <p class="field-help">Trim values are applied to this clip in the sequence.</p>
+          <div class="inspector-section">
+            <div class="inspector-section-title">TRANSFORM</div>
+            <div class="inspector-control"><label for="clip-scale">Scale <output id="clip-scale-value">100%</output></label><input id="clip-scale" data-edit="scale" type="range" min="50" max="200" value="100" step="1"></div>
+            <div class="inspector-control"><label for="clip-rotation">Rotation <output id="clip-rotation-value">0°</output></label><input id="clip-rotation" data-edit="rotation" type="range" min="-180" max="180" value="0" step="1"></div>
+            <div class="inspector-two"><div class="inspector-control"><label for="clip-x">Position X</label><input id="clip-x" data-edit="x" type="number" min="-1000" max="1000" value="0" step="1"></div><div class="inspector-control"><label for="clip-y">Position Y</label><input id="clip-y" data-edit="y" type="number" min="-1000" max="1000" value="0" step="1"></div></div>
+            <div class="inspector-control"><label for="clip-opacity">Opacity <output id="clip-opacity-value">100%</output></label><input id="clip-opacity" data-edit="opacity" type="range" min="0" max="100" value="100" step="1"></div>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-section-title">SPEED & TIMING</div>
+            <div class="inspector-control"><label for="clip-speed">Playback speed <output id="clip-speed-value">1.00×</output></label><input id="clip-speed" data-edit="speed" type="range" min="0.5" max="2" value="1" step="0.05"></div>
+            <div class="inspector-two"><div class="inspector-control"><label for="clip-fade-in">Fade in (sec)</label><input id="clip-fade-in" data-edit="fadeIn" type="number" min="0" max="10" value="0" step="0.1"></div><div class="inspector-control"><label for="clip-fade-out">Fade out (sec)</label><input id="clip-fade-out" data-edit="fadeOut" type="number" min="0" max="10" value="0" step="0.1"></div></div>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-section-title">AUDIO</div>
+            <div class="inspector-control"><label for="clip-volume">Clip volume <output id="clip-volume-value">100%</output></label><input id="clip-volume" data-edit="volume" type="range" min="0" max="200" value="100" step="1"></div>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-section-title">COLOR</div>
+            <div class="inspector-control"><label for="clip-brightness">Brightness <output id="clip-brightness-value">0</output></label><input id="clip-brightness" data-edit="brightness" type="range" min="-0.5" max="0.5" value="0" step="0.01"></div>
+            <div class="inspector-control"><label for="clip-contrast">Contrast <output id="clip-contrast-value">1.00</output></label><input id="clip-contrast" data-edit="contrast" type="range" min="0.5" max="2" value="1" step="0.01"></div>
+            <div class="inspector-control"><label for="clip-saturation">Saturation <output id="clip-saturation-value">1.00</output></label><input id="clip-saturation" data-edit="saturation" type="range" min="0" max="2" value="1" step="0.01"></div>
+          </div>
+          <div class="inspector-actions"><button class="button button-quiet" id="reset-inspector" type="button">Reset clip adjustments</button></div>
+          <p class="field-help">Adjustments are previewed on the selected clip and applied when you export the sequence.</p>
         </div>
       </section>
 
@@ -120,7 +144,18 @@
       </section>
     </aside>
   </main>
-  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.4.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><button class="engine-connect" id="backend-connect" type="button">Connect engine</button><span>LOCAL-FIRST WORKSPACE</span></footer>
+  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.5.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><button class="engine-connect" id="backend-connect" type="button">Connect engine</button><span>LOCAL-FIRST WORKSPACE</span></footer>
+</div>
+
+<div class="export-backdrop" id="export-dialog" hidden>
+  <section class="export-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="export-title">
+    <div class="export-dialog-heading"><div><span class="eyebrow">RENDER SETTINGS</span><h2 id="export-title">Export sequence</h2></div><button id="export-close" class="export-close" type="button" aria-label="Close export settings">×</button></div>
+    <div class="export-setting"><label for="export-resolution">Resolution</label><select id="export-resolution"><option value="source">Match source</option><option value="720">HD · 720p</option><option value="1080" selected>Full HD · 1080p</option><option value="1440">2K · 1440p</option><option value="2160">4K · 2160p</option></select></div>
+    <div class="export-setting"><label for="export-format">File format</label><select id="export-format"><option value="mp4">MP4 · H.264</option><option value="mov">MOV · H.264</option><option value="mkv">MKV · H.264</option><option value="webm">WebM · VP9</option><option value="avi">AVI · MPEG-4</option><option value="gif">GIF · Animated</option></select></div>
+    <div class="export-setting"><label for="export-quality">Quality</label><select id="export-quality"><option value="high">High quality</option><option value="balanced" selected>Balanced</option><option value="small">Smaller file</option></select></div>
+    <p class="export-note" id="export-capability-note">Available options are checked against the connected FFmpeg engine.</p>
+    <div class="export-dialog-actions"><button class="button button-quiet" id="export-cancel" type="button">Cancel</button><button class="button button-primary" id="export-start" type="button">Render & download ↗</button></div>
+  </section>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input id="project-input" type="file" accept=".pvsproject,.json,application/json" hidden>
