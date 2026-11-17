@@ -42,9 +42,14 @@
           <div><span class="eyebrow">CANVAS</span><h2>Preview Monitor</h2></div>
           <div class="preview-meta"><span id="preview-resolution">NO MEDIA</span><span class="live-pill">LOCAL PREVIEW</span></div>
         </div>
-        <div class="preview-stage">
+        <div class="preview-stage" id="preview-stage">
           <div class="preview-empty" id="preview-empty"><div class="play-emblem">▶</div><h3>Your story starts here.</h3><p>Import multiple videos to build a sequence.</p></div>
           <video id="video-preview" playsinline preload="metadata" hidden></video>
+          <div class="preview-overlay" id="preview-overlay" aria-label="Video playback controls">
+            <button class="overlay-control skip-control" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">−10</button>
+            <button class="overlay-control overlay-play" id="overlay-play-button" type="button" title="Play" aria-label="Play">▶</button>
+            <button class="overlay-control skip-control" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">+10</button>
+          </div>
         </div>
         <div class="transport">
           <div class="transport-left">
