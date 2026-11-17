@@ -239,7 +239,8 @@
 
   $('apply-trim').onclick=applyTrim;$('remove-clip').onclick=()=>{const c=selected();if(c)removeClip(c.id);};
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
-  $('export-button').onclick=exportSequence;$('save-project').onclick=saveProject;\n  $('backend-connect').onclick = () => {
+  $('export-button').onclick=exportSequence;$('save-project').onclick=saveProject;
+  $('backend-connect').onclick = () => {
     const entered = prompt('Paste your FastAPI backend base URL (example: https://your-api.example.com). Leave blank to use same-origin hosting:', state.apiBase);
     if (entered === null) return;
     const raw = entered.trim();
