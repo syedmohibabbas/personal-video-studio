@@ -262,3 +262,30 @@
   .fullscreen-close,.fullscreen-close svg{transition:none}
   .preview-stage:fullscreen .fullscreen-close{animation:none}
 }
+
+/* v0.5 Inspector controls */
+.inspector-panel{min-height:0}
+.inspector-section{padding:11px 0;border-top:1px solid #252c39}
+.inspector-section-title{font-size:8px;letter-spacing:1.3px;color:#a99bea;font-weight:800;margin-bottom:10px}
+.inspector-control{margin:0 0 10px}
+.inspector-control label{display:flex;justify-content:space-between;align-items:center;color:#aeb7c7;font-size:9px;margin-bottom:6px}
+.inspector-control output{color:#c8baff;font:10px ui-monospace,monospace}
+.inspector-control input[type=range]{width:100%;accent-color:#9b83ff;cursor:pointer}
+.inspector-control input[type=number],.export-setting select{width:100%;min-width:0;background:#171d27;border:1px solid #293140;border-radius:5px;padding:8px;color:#e4e8f0;font:10px var(--font)}
+.inspector-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inspector-two .inspector-control{min-width:0}
+.inspector-actions{padding:10px 0;border-top:1px solid #252c39}
+.inspector-actions .button{width:100%}
+.export-backdrop{position:fixed;inset:0;z-index:50;background:rgba(3,5,10,.76);backdrop-filter:blur(10px);display:grid;place-items:center;padding:18px}
+.export-backdrop[hidden]{display:none}
+.export-dialog-panel{width:min(100%,430px);padding:22px;background:#11151d;border:1px solid #353047;border-radius:14px;box-shadow:0 24px 90px #000b}
+.export-dialog-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.export-dialog-heading h2{font:600 19px var(--display);margin:4px 0 0}
+.export-close{width:32px;height:32px;border-radius:50%;border:1px solid #343b4b;background:#1a202c;color:#dfe4ef;font-size:22px;cursor:pointer}
+.export-setting{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:12px;margin:12px 0}
+.export-setting label{font-size:10px;color:#9da8ba}
+.export-setting select{cursor:pointer}
+.export-note{font-size:9px;line-height:1.5;color:#7d899c;padding:10px;background:#171c27;border-radius:6px}
+.export-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+#export-start:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:760px){.export-setting{grid-template-columns:1fr;gap:5px}}
