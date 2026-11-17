@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, backendOnline: false, exporting: false, toastTimer: null, pendingProject: null };
+  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', backendOnline: false, exporting: false, toastTimer: null, pendingProject: null };
   const video = $('video-preview');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
@@ -17,9 +17,9 @@
   }
   const toast = message => { const el=$('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>el.classList.remove('show'),3200); };
 
-  async function checkHealth() {
+  const apiUrl = path => (state.apiBase ? state.apiBase.replace(/\\/$/, '') : '') + path;\n\n  async function checkHealth() {
     try {
-      const r = await fetch('/api/health');
+      const r = await fetch(apiUrl('/api/health'));
       if (!r.ok) throw new Error();
       const d = await r.json(); state.backendOnline = true;
       $('backend-status').innerHTML = `<i class="status-dot"></i> ENGINE ${esc(String(d.status || 'ONLINE').toUpperCase())}${d.ffmpeg_available ? ' · FFMPEG READY' : ' · FFMPEG MISSING'}`;
@@ -133,7 +133,7 @@
       form.append('aspect', state.previewAspect);
       form.append('audio_volume', String(state.audioVolume));
       if (state.audioFile) form.append('audio', state.audioFile, state.audioFile.name);
-      const response = await fetch('/api/export-sequence', { method: 'POST', body: form });
+      const response = await fetch(apiUrl('/api/export-sequence'), { method: 'POST', body: form });
       if (!response.ok) {
         let message = 'Sequence export failed. Check the backend and FFmpeg.';
         try { message = (await response.json()).detail || message; } catch {}
@@ -237,7 +237,7 @@
 
   $('apply-trim').onclick=applyTrim;$('remove-clip').onclick=()=>{const c=selected();if(c)removeClip(c.id);};
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
-  $('export-button').onclick=exportSequence;$('save-project').onclick=saveProject;
+  $('export-button').onclick=exportSequence;$('save-project').onclick=saveProject;\n  $('backend-connect').onclick=()=>{\n    const entered=prompt('Paste your FastAPI backend base URL (example: https://your-api.example.com). Leave blank to use same-origin hosting:',state.apiBase);\n    if(entered===null)return;\n    const clean=entered.trim().replace(/\\/$/,'');\n    if(clean){try{const parsed=new URL(clean);if(!['http:','https:'].includes(parsed.protocol))throw new Error();}catch{toast('Enter a valid http:// or https:// backend URL.');return;}}\n    state.apiBase=clean;localStorage.setItem('pvs_api_base',clean);checkHealth();toast(clean?'Backend address saved. Checking connection…':'Using same-origin backend.');\n  };
   $('load-project').onclick=()=>$('project-input').click();$('project-input').onchange=e=>{const f=e.target.files?.[0];if(f)loadProject(f);e.target.value='';};
   $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;state.projectName='Untitled Project';state.previewAspect='landscape';setPreviewAspect('landscape');if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;state.audioVolume=.35;$('audio-volume').value=35;$('audio-volume-value').textContent='35%';video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('project-name').textContent=state.projectName;$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
