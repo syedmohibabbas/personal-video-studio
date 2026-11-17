@@ -126,6 +126,35 @@
     finally{state.exporting=false;$('export-button').textContent='Export selected ↗';render();}
   }
 
+  const previewAspectButtons = { landscape: $('aspect-landscape'), portrait: $('aspect-portrait') };
+  function setPreviewAspect(mode) {
+    const stage = $('preview-stage');
+    const portrait = mode === 'portrait';
+    stage.classList.toggle('aspect-portrait', portrait);
+    stage.classList.toggle('aspect-landscape', !portrait);
+    previewAspectButtons.landscape.classList.toggle('is-active', !portrait);
+    previewAspectButtons.portrait.classList.toggle('is-active', portrait);
+    previewAspectButtons.landscape.setAttribute('aria-pressed', String(!portrait));
+    previewAspectButtons.portrait.setAttribute('aria-pressed', String(portrait));
+  }
+  async function openFullscreenPreview() {
+    const stage = $('preview-stage');
+    if (!stage.classList.contains('has-video')) { toast('Import and select a clip first.'); return; }
+    try {
+      if (!document.fullscreenElement) await stage.requestFullscreen();
+    } catch { toast('Full screen preview is not available in this browser.'); }
+  }
+  async function closeFullscreenPreview() {
+    if (document.fullscreenElement === $('preview-stage')) await document.exitFullscreen();
+  }
+  $('fullscreen-preview').onclick = openFullscreenPreview;
+  $('fullscreen-close').onclick = event => { event.stopPropagation(); closeFullscreenPreview(); };
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.fullscreenElement === $('preview-stage')) closeFullscreenPreview();
+  });
+  $('aspect-landscape').onclick = () => setPreviewAspect('landscape');
+  $('aspect-portrait').onclick = () => setPreviewAspect('portrait');
+
   $('video-drop').onclick=()=>$('video-input').click();
   $('video-input').onchange=async e=>{for(const f of Array.from(e.target.files||[]))await addVideo(f);e.target.value='';};
   $('video-drop').ondragover=e=>{e.preventDefault();$('video-drop').classList.add('dragging');};
