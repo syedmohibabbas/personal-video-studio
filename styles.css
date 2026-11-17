@@ -63,3 +63,31 @@
   .overlay-play{width:50px;height:50px}
   .skip-control{width:38px;height:38px}
 }
+
+/* YouTube-inspired preview transport: compact glyphs, soft scrim and timed visibility */
+.preview-overlay{z-index:3;gap:clamp(22px,4vw,48px);background:linear-gradient(0deg,rgba(0,0,0,.24),transparent 48%,rgba(0,0,0,.08));opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease}
+.preview-stage.has-video.controls-visible .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.preview-stage.has-video:focus-within .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.overlay-control{padding:0;border:0;background:rgba(22,22,22,.72);backdrop-filter:blur(2px);box-shadow:0 2px 10px rgba(0,0,0,.2);color:#fff;transition:transform .16s ease,background .16s ease,opacity .16s ease}
+.overlay-control:hover{transform:scale(1.12);background:rgba(48,48,48,.9)}
+.overlay-control:active{transform:scale(.94)}
+.overlay-control:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.overlay-play{width:64px;height:64px;background:rgba(28,28,28,.78)}
+.overlay-play:hover{background:rgba(50,50,50,.94)}
+.skip-control{width:52px;height:52px;background:transparent;box-shadow:none}
+.skip-control:hover{background:rgba(0,0,0,.35)}
+.overlay-control svg{width:100%;height:100%;overflow:visible}
+.skip-control svg path{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.skip-control svg text{fill:#fff;font:700 12px Arial,sans-serif}
+.skip-control svg .skip-arrow{stroke-width:2.1}
+.overlay-play svg{width:31px;height:31px;fill:#fff}
+.overlay-play .pause-glyph{display:none}
+.preview-stage.is-playing .overlay-play .play-glyph{display:none}
+.preview-stage.is-playing .overlay-play .pause-glyph{display:block}
+.preview-stage:not(.has-video) .preview-overlay{display:none}
+@media(max-width:760px){
+ .preview-overlay{gap:24px}
+ .overlay-play{width:54px;height:54px}
+ .skip-control{width:44px;height:44px}
+}
+@media(prefers-reduced-motion:reduce){.preview-overlay,.overlay-control{transition:none}}
