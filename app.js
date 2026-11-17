@@ -16,7 +16,7 @@
     clearTimeout(controlsHideTimer);
     if (autoHide && !video.paused) {
       controlsHideTimer = setTimeout(() => {
-        if (!stage.matches(':hover') && !stage.contains(document.activeElement)) stage.classList.remove('controls-visible');
+        if (!stage.contains(document.activeElement)) stage.classList.remove('controls-visible');
       }, 2300);
     }
   }
