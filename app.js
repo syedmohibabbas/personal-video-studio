@@ -14,10 +14,8 @@
     if (!stage.classList.contains('has-video')) return;
     stage.classList.add('controls-visible');
     clearTimeout(controlsHideTimer);
-    if (autoHide && !video.paused) {
-      controlsHideTimer = setTimeout(() => {
-        if (!stage.contains(document.activeElement)) stage.classList.remove('controls-visible');
-      }, 2300);
+    if (autoHide) {
+      controlsHideTimer = setTimeout(() => stage.classList.remove('controls-visible'), 2000);
     }
   }
   function hidePreviewControls() {
@@ -155,20 +153,34 @@
     $('play-button').textContent=icon;
     $('overlay-play-button').title=label;$('overlay-play-button').setAttribute('aria-label',label);
     $('preview-stage').classList.toggle('is-playing',!video.paused);
-    if (video.paused) revealPreviewControls(false);
-    else revealPreviewControls(true);
   }
   video.onplay=syncPlaybackButtons;video.onpause=syncPlaybackButtons;
   const previewStage=$('preview-stage');
-  previewStage.addEventListener('pointerenter',()=>revealPreviewControls(false));
-  previewStage.addEventListener('pointermove',()=>revealPreviewControls(true));
-  previewStage.addEventListener('pointerleave',()=>{if(video.paused)hidePreviewControls();else{clearTimeout(controlsHideTimer);controlsHideTimer=setTimeout(hidePreviewControls,180);}});
-  previewStage.addEventListener('touchstart',()=>revealPreviewControls(true),{passive:true});
-  previewStage.addEventListener('focusin',()=>revealPreviewControls(false));
-  previewStage.addEventListener('focusout',()=>{if(!previewStage.matches(':hover'))hidePreviewControls();});
-  $('overlay-play-button').onclick=()=>$('play-button').click();
-  $('seek-backward').onclick=()=>{const c=selected();if(c)video.currentTime=Math.max(c.start,video.currentTime-10);};
-  $('seek-forward').onclick=()=>{const c=selected();if(c)video.currentTime=Math.min(c.end,video.currentTime+10);};
+  // Controls are summoned by a click/tap on the video, never by hovering.
+  previewStage.addEventListener('click',event=>{
+    if(event.target.closest('.overlay-control')) return;
+    if(event.target===video || event.target===previewStage) revealPreviewControls(true);
+  });
+  previewStage.addEventListener('touchend',event=>{
+    if(event.target===video || event.target===previewStage) revealPreviewControls(true);
+  },{passive:true});
+  $('overlay-play-button').onclick=event=>{
+    event.stopPropagation();
+    $('play-button').click();
+    revealPreviewControls(true);
+  };
+  $('seek-backward').onclick=event=>{
+    event.stopPropagation();
+    const c=selected();if(c)video.currentTime=Math.max(c.start,video.currentTime-10);
+    hidePreviewControls();
+    event.currentTarget.blur();
+  };
+  $('seek-forward').onclick=event=>{
+    event.stopPropagation();
+    const c=selected();if(c)video.currentTime=Math.min(c.end,video.currentTime+10);
+    hidePreviewControls();
+    event.currentTarget.blur();
+  };
   video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=fmt(Math.max(0,video.currentTime-c.start));if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
   $('jump-start').onclick=()=>{const c=selected();if(c)video.currentTime=c.start;};
   $('jump-end').onclick=()=>{const c=selected();if(c)video.currentTime=c.end;};
