@@ -101,3 +101,25 @@
 .preview-stage.has-video:hover .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .preview-stage.has-video.controls-visible .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
 .preview-stage.has-video:focus-within .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
+
+
+/* Transport row: 10-second seek icons flank a permanently visible center play button. */
+.transport .play-button{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;font-size:15px}
+.transport .transport-left{gap:12px}
+.transport-button.seek-transport{width:34px;height:34px;display:grid;place-items:center;padding:2px;color:#d7d1f5}
+.seek-transport svg{width:30px;height:30px;overflow:visible}
+.seek-transport svg path{fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.seek-transport svg text{fill:currentColor;font:700 12px Arial,sans-serif}
+.seek-transport:hover{color:#fff;transform:scale(1.08)}
+/* The in-video overlay contains only the play/pause glyph and is controlled by clicks. */
+.preview-stage.has-video .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
+.preview-stage.has-video.controls-visible .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.preview-stage.has-video:focus-within .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
+.preview-stage.has-video.controls-visible:focus-within .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.preview-overlay{background:rgba(0,0,0,.12)}
+.overlay-play{width:68px;height:68px}
+@media(max-width:760px){
+ .transport .transport-left{gap:7px}
+ .transport .play-button,.transport-button.seek-transport{width:32px;height:32px}
+ .seek-transport svg{width:28px;height:28px}
+}
