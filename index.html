@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0d12">
-  <title>Personal Video Studio — v0.2</title>
+  <title>Personal Video Studio — v0.3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
@@ -11,8 +11,8 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.2</span></a>
-    <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span></div>
+    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.3</span></a>
+    <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span><button class="rename-project-button" id="rename-project" type="button" title="Rename project" aria-label="Rename project">✎</button></div>
     <div class="top-actions">
       <button class="button button-quiet" id="new-project">New</button>
       <button class="button button-quiet" id="save-project">Save project</button>
@@ -119,7 +119,7 @@
       </section>
     </aside>
   </main>
-  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.2.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><span>LOCAL-FIRST WORKSPACE</span></footer>
+  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.3.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><span>LOCAL-FIRST WORKSPACE</span></footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input id="project-input" type="file" accept=".pvsproject,.json,application/json" hidden>
