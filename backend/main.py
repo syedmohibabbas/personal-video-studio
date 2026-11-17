@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'.mp4', '.mov', '.webm', '.mkv'}
 app = FastAPI(title='Personal Video Studio API', version='0.4.0')
-app.add_middleware(CORSMiddleware, allow_origins=['http://127.0.0.1:8000','http://localhost:8000','https://syedmohibabbas.github.io'], allow_credentials=False, allow_methods=['GET','POST'], allow_headers=['*'])
+app.add_middleware(CORSMiddleware, allow_origins=['https://syedmohibabbas.github.io'], allow_origin_regex=r'https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?', allow_credentials=False, allow_methods=['GET','POST'], allow_headers=['*'])
 
 def tool(name: str): return shutil.which(name)
 def require_tools():
