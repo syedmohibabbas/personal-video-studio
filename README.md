@@ -1,29 +1,34 @@
-# Personal Video Studio — v0.4.0
+# Personal Video Studio — v0.5.0
 
-A local-first browser video editing workspace with multi-clip sequencing, trimming, drag-to-reorder timeline, soundtrack controls, project settings, and a FastAPI + FFmpeg sequence renderer.
+A local-first browser video editing workspace with multi-clip sequencing, a clip Inspector, and a FastAPI + FFmpeg sequence renderer.
 
-## v0.4 features
-- Export the **complete ordered sequence** as one MP4 instead of exporting only the selected clip.
-- Mix an optional background music file into the exported sequence; soundtrack loops to the sequence duration and has an adjustable volume control.
-- Drag clips left or right on the timeline to change sequence order.
-- Save and restore project name, preview aspect ratio, clip trim points, and soundtrack volume.
-- Landscape (16:9) and portrait (9:16) output selection follows the preview aspect setting.
-- Retains media import, clip selection, trim controls, fullscreen preview, and keyboard shortcuts.
+## v0.5 features
+- Clip Inspector: trim in/out, scale, rotation, X/Y position, opacity, playback speed, fade in/out, clip volume, brightness, contrast, and saturation.
+- Inspector adjustments are saved in project files and restored when the source media is re-imported.
+- Live preview for transform, opacity, speed, clip volume, and basic color adjustments.
+- Export dialog with Match Source, 720p, 1080p, 2K (1440p), and 4K (2160p) resolution choices.
+- Quality presets: High Quality, Balanced, and Smaller File.
+- Export formats: MP4, MOV, MKV, WebM, AVI, and animated GIF where the connected FFmpeg build provides the required encoders.
+- The frontend checks `/api/capabilities` and disables formats the connected engine cannot encode.
+- Full sequence export applies supported Inspector settings, soundtrack mix, selected aspect ratio, resolution, format, and quality.
 
-## Known limitations
-- Project files save edit settings and source filenames, **not the original media files**. Re-import the same source videos after reopening a project. Background audio must also be re-imported.
-- Sequence rendering requires the FastAPI backend and FFmpeg/FFprobe. GitHub Pages serves only the static frontend. Use **Connect engine** in the footer to enter the separately hosted FastAPI backend URL; the backend allows the project's GitHub Pages origin and local development origins.
-- Rendering is a straightforward ordered cut/concat workflow. Crossfades, advanced transitions, animated motion graphics, keyframes, color grading controls, and multi-track editing are not implemented yet.
-- AI Director remains a roadmap item: AI scene understanding, automatic creative decisions, AI-generated motion graphics, and AI finishing are not active.
-- The backend currently has no user accounts or cloud project storage. Treat it as a personal/private deployment and do not expose it publicly without adding authentication and resource controls.
+## Important behavior and limitations
+- Resolution choices specify output dimensions; upscaling a low-resolution source does not create genuine extra detail.
+- GIF exports are silent and may be very large; audio is omitted by design.
+- WebM, AVI, MOV, MKV, and GIF availability depends on the installed FFmpeg encoders. Only detected formats are selectable.
+- Project files save edit settings and source filenames, **not the original media files**. Re-import source videos after reopening. Background audio must also be re-imported.
+- Export requires the FastAPI backend and FFmpeg/FFprobe. GitHub Pages serves only the static frontend. Use **Connect engine** to enter the separately hosted FastAPI backend URL.
+- This is not yet a complete AI editing system. AI scene understanding, automatic creative decisions, motion graphics generation, advanced transitions, multi-track editing, and advanced color tools remain future work.
+- Do not expose a personal backend publicly without authentication, upload limits appropriate to the deployment, and resource controls.
 
 ## Requirements
 Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser.
 
 ## API
 - `GET /api/health`
+- `GET /api/capabilities` — available output encoders/formats
 - `POST /api/analyze` — basic FFprobe metadata
-- `POST /api/export` — legacy single-clip export
-- `POST /api/export-sequence` — full ordered sequence render with optional background music
+- `POST /api/export` — legacy single-clip MP4 export
+- `POST /api/export-sequence` — sequence render with per-clip adjustments and optional background audio
 
 Never commit API keys or `.env` files. Do not send private footage to cloud services without consent.
