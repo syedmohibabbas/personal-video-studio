@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { clips: [], selectedId: null, audioFile: null, audioUrl: null, audio: new Audio(), backendOnline: false, exporting: false, toastTimer: null, pendingProject: null };
+  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), backendOnline: false, exporting: false, toastTimer: null, pendingProject: null };
   const video = $('video-preview');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
@@ -32,6 +32,7 @@
   function totalDuration() { return state.clips.reduce((sum,c)=>sum+Math.max(0,c.end-c.start),0); }
   function render() {
     const count=state.clips.length;
+    $('project-name').textContent = state.projectName;
     $('media-count').textContent=`${count} ${count===1?'ITEM':'ITEMS'}`;
     $('media-list').innerHTML = count ? state.clips.map((c,i)=>`
       <div class="media-item ${c.id===state.selectedId?'selected':''}" data-id="${esc(c.id)}">
@@ -60,7 +61,7 @@
   function selectClip(id) {
     const c=state.clips.find(x=>x.id===id); if(!c)return;
     state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); hidePreviewControls();
-    $('project-name').textContent='Untitled Project'; $('preview-resolution').textContent=`${c.width} × ${c.height}`;
+    $('preview-resolution').textContent=`${c.width} × ${c.height}`;
     $('preview-hint').textContent=`CLIP ${state.clips.indexOf(c)+1} OF ${state.clips.length}`;
     video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=fmt(c.end-c.start);};
     render();
@@ -97,9 +98,9 @@
     c.start=a;c.end=b; if(state.clips.length)selectClip(c.id); render(); toast('Trim points applied.');
   }
   function saveProject() {
-    const data={format:'PVS_PROJECT',version:'0.2.0',projectName:'Untitled Project',clips:state.clips.map(c=>({name:c.name,duration:c.duration,start:c.start,end:c.end,width:c.width,height:c.height})),audioName:state.audioFile?.name||null};
+    const data={format:'PVS_PROJECT',version:'0.3.0',projectName:state.projectName,previewAspect:state.previewAspect,clips:state.clips.map(c=>({name:c.name,duration:c.duration,start:c.start,end:c.end,width:c.width,height:c.height})),audioName:state.audioFile?.name||null};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='personal-video-studio-project.pvsproject';a.click();URL.revokeObjectURL(url);
+    a.href=url;a.download=(state.projectName.trim().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'personal-video-studio')+'.pvsproject';a.click();URL.revokeObjectURL(url);
     toast('Project settings saved. Re-import the source media when reopening.');
   }
   async function loadProject(file) {
@@ -107,8 +108,11 @@
       const data=JSON.parse(await file.text());
       if(data.format!=='PVS_PROJECT'||!Array.isArray(data.clips))throw new Error('This is not a valid PVS project file.');
       toast('Project settings loaded. Re-import the source videos; saved trim points will be restored by filename.');
-      $('project-name').textContent=file.name.replace(/\.(pvsproject|json)$/i,'');
+      state.projectName = String(data.projectName || file.name.replace(/\.(pvsproject|json)$/i,''));
+      state.previewAspect = data.previewAspect === 'portrait' ? 'portrait' : 'landscape';
+      setPreviewAspect(state.previewAspect);
       state.pendingProject=data;
+      render();
     } catch(e){toast(e.message||'Could not open project file.');}
   }
   async function exportSelected() {
@@ -130,6 +134,7 @@
   function setPreviewAspect(mode) {
     const stage = $('preview-stage');
     const portrait = mode === 'portrait';
+    state.previewAspect = portrait ? 'portrait' : 'landscape';
     stage.classList.toggle('aspect-portrait', portrait);
     stage.classList.toggle('aspect-landscape', !portrait);
     previewAspectButtons.landscape.classList.toggle('is-active', !portrait);
@@ -155,6 +160,14 @@
   $('aspect-landscape').onclick = () => setPreviewAspect('landscape');
   $('aspect-portrait').onclick = () => setPreviewAspect('portrait');
 
+  $('rename-project').onclick = () => {
+    const next = prompt('Enter project name:', state.projectName);
+    if (next === null) return;
+    const clean = next.trim().slice(0, 80);
+    if (!clean) { toast('Project name cannot be empty.'); return; }
+    state.projectName = clean; render(); toast('Project renamed.');
+  };
+
   $('video-drop').onclick=()=>$('video-input').click();
   $('video-input').onchange=async e=>{for(const f of Array.from(e.target.files||[]))await addVideo(f);e.target.value='';};
   $('video-drop').ondragover=e=>{e.preventDefault();$('video-drop').classList.add('dragging');};
@@ -168,7 +181,7 @@
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
   $('export-button').onclick=exportSelected;$('save-project').onclick=saveProject;
   $('load-project').onclick=()=>$('project-input').click();$('project-input').onchange=e=>{const f=e.target.files?.[0];if(f)loadProject(f);e.target.value='';};
-  $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('project-name').textContent='Untitled Project';$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
+  $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;state.projectName='Untitled Project';state.previewAspect='landscape';setPreviewAspect('landscape');if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('project-name').textContent=state.projectName;$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
   function syncPlaybackButtons(){
     const icon=video.paused?'▶':'Ⅱ',label=video.paused?'Play':'Pause';
@@ -211,5 +224,18 @@
   function stepClip(delta){const i=state.clips.findIndex(c=>c.id===state.selectedId),c=state.clips[i+delta];if(c)selectClip(c.id);}
   $('previous-clip').onclick=()=>stepClip(-1);$('next-clip').onclick=()=>stepClip(1);
   $('fit-timeline').onclick=()=>toast('Timeline fitted to the current sequence.');
+
+  // Keyboard shortcuts: Space toggles playback, arrows seek, Ctrl/Cmd+S saves.
+  document.addEventListener('keydown', event => {
+    const target = event.target;
+    const typing = target && (target.isContentEditable || /INPUT|TEXTAREA|SELECT/.test(target.tagName));
+    if (typing || event.altKey) return;
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveProject(); return; }
+    if (event.key === ' ' && !event.ctrlKey && !event.metaKey) { event.preventDefault(); $('play-button').click(); return; }
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const c = selected(); if (!c) return;
+      event.preventDefault(); video.currentTime = Math.max(c.start, Math.min(c.end, video.currentTime + (event.key === 'ArrowLeft' ? -5 : 5)));
+    }
+  });
   checkHealth();render();
 })();
