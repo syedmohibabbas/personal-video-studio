@@ -157,3 +157,12 @@
 .rename-project-button:hover{background:#292341;color:#e2dbff;border-color:#62538f}
 .project-name{display:flex;align-items:center;gap:2px}
 @media(max-width:760px){.project-name{display:none}}
+
+
+/* v0.4 sequence editing and soundtrack controls */
+.audio-volume-control{display:flex;align-items:center;gap:8px;margin-top:9px;padding:8px 9px;border:1px solid #293b38;border-radius:6px;background:#111d1b;color:#80b6a4;font-size:8px;letter-spacing:1px;font-weight:700}
+.audio-volume-control span{margin-left:auto;color:#b8d8ca;font:10px ui-monospace,monospace;letter-spacing:0;min-width:30px;text-align:right}
+.audio-volume-control input{width:100%;accent-color:#65b99a;cursor:pointer}
+.sequence-clip{cursor:grab}
+.sequence-clip:active,.sequence-clip.is-dragging{cursor:grabbing;opacity:.55}
+#export-button{min-width:132px}
