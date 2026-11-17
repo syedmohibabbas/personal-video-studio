@@ -8,18 +8,11 @@
   const short = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const selected = () => state.clips.find(c => c.id === state.selectedId) || null;
-  let controlsHideTimer = null;
-  function revealPreviewControls(autoHide = true) {
+  function revealPreviewControls() {
     const stage = $('preview-stage');
-    if (!stage.classList.contains('has-video')) return;
-    stage.classList.add('controls-visible');
-    clearTimeout(controlsHideTimer);
-    if (autoHide) {
-      controlsHideTimer = setTimeout(() => stage.classList.remove('controls-visible'), 2000);
-    }
+    if (stage.classList.contains('has-video')) stage.classList.add('controls-visible');
   }
   function hidePreviewControls() {
-    clearTimeout(controlsHideTimer);
     $('preview-stage').classList.remove('controls-visible');
   }
   const toast = message => { const el=$('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>el.classList.remove('show'),3200); };
@@ -66,7 +59,7 @@
   }
   function selectClip(id) {
     const c=state.clips.find(x=>x.id===id); if(!c)return;
-    state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); revealPreviewControls(false);
+    state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); hidePreviewControls();
     $('project-name').textContent='Untitled Project'; $('preview-resolution').textContent=`${c.width} × ${c.height}`;
     $('preview-hint').textContent=`CLIP ${state.clips.indexOf(c)+1} OF ${state.clips.length}`;
     video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=fmt(c.end-c.start);};
@@ -156,18 +149,20 @@
   }
   video.onplay=syncPlaybackButtons;video.onpause=syncPlaybackButtons;
   const previewStage=$('preview-stage');
-  // Controls are summoned by a click/tap on the video, never by hovering.
+  // Clicking the preview toggles playback and the in-video play glyph together.
+  // Pause = show the large play glyph; play = hide it.
   previewStage.addEventListener('click',event=>{
     if(event.target.closest('.overlay-control')) return;
-    if(event.target===video || event.target===previewStage) revealPreviewControls(true);
+    if(event.target===video || event.target===previewStage){
+      $('play-button').click();
+      if(video.paused) revealPreviewControls();
+      else hidePreviewControls();
+    }
   });
-  previewStage.addEventListener('touchend',event=>{
-    if(event.target===video || event.target===previewStage) revealPreviewControls(true);
-  },{passive:true});
   $('overlay-play-button').onclick=event=>{
     event.stopPropagation();
     $('play-button').click();
-    revealPreviewControls(true);
+    hidePreviewControls();
   };
   $('seek-backward').onclick=event=>{
     event.stopPropagation();
