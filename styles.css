@@ -91,3 +91,8 @@
  .skip-control{width:44px;height:44px}
 }
 @media(prefers-reduced-motion:reduce){.preview-overlay,.overlay-control{transition:none}}
+
+/* Override the earlier hover-only rule: JS controls the YouTube-style auto-hide timer. */
+.preview-stage.has-video:hover .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
+.preview-stage.has-video.controls-visible:hover .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.preview-stage.has-video:focus-within .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
