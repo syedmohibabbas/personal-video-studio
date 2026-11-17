@@ -96,3 +96,8 @@
 .preview-stage.has-video:hover .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
 .preview-stage.has-video.controls-visible:hover .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
 .preview-stage.has-video:focus-within .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+
+/* Click-to-show interaction: pointer hover and keyboard focus do not summon controls. */
+.preview-stage.has-video:hover .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
+.preview-stage.has-video.controls-visible .preview-overlay{opacity:1;visibility:visible;pointer-events:auto}
+.preview-stage.has-video:focus-within .preview-overlay{opacity:0;visibility:hidden;pointer-events:none}
