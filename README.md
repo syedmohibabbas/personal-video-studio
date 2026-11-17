@@ -1,39 +1,27 @@
-# Personal Video Studio — v0.2.0
+# Personal Video Studio — v0.3.0
 
-A local-first browser video editing foundation with multi-clip sequencing, per-clip trim points, background audio preview, project settings save/load, and a FastAPI + FFmpeg single-clip export endpoint.
+A local-first browser video editing foundation with a multi-clip media library, sequence ordering, clip trimming, preview controls, aspect-ratio preview, project settings, and a FastAPI + FFmpeg export endpoint.
 
-## v0.2 features
-- Import multiple MP4, MOV, WEBM, and MKV clips.
-- Select clips and reorder them in the sequence.
-- Apply independent In/Out trim points to each clip.
-- Preview an imported background audio file while previewing the selected video.
-- Save project settings to `.pvsproject` JSON and reopen the project file.
-- Responsive editor interface and backend health indicator.
-- Export the selected clip through the FastAPI + FFmpeg backend.
+## v0.3 features
+- Rename projects; project names are shown in the workspace and saved in project files.
+- Save and restore the selected preview aspect ratio (16:9 landscape or 9:16 portrait).
+- Keyboard shortcuts: Space toggles playback, Left/Right arrows seek by 5 seconds, Ctrl/Cmd+S saves the project.
+- Save project files with v0.3 metadata while retaining compatibility with earlier `.pvsproject` files.
+- Retains v0.2 media import, clip ordering, per-clip trim points, audio preview, fullscreen preview, and single-clip export.
 
-## Important limitations
-- Project files save edit settings and media filenames, **not the original media files**. Re-import the source videos when reopening a project.
-- Background audio is currently for browser preview; it is not mixed into the exported MP4.
+## Known limitations
+- Project files save edit settings and media filenames, **not original media files**. Re-import source videos when reopening a project.
+- Background audio is for browser preview only; it is not mixed into exported MP4 files.
 - Export currently renders the selected clip only, not the complete multi-clip sequence.
-- The AI Director is a roadmap placeholder. No AI scene understanding, auto-editing, motion-graphics generation, or AI finishing is active.
-- GitHub Pages can host the static interface, but it cannot run FastAPI or FFmpeg. The backend must be hosted separately for MP4 export.
+- The AI Director remains a roadmap placeholder. No AI scene understanding, automatic creative editing, motion-graphics generation, or AI finishing is active.
+- GitHub Pages hosts the static interface only. FastAPI and FFmpeg must be hosted separately for MP4 export.
 
 ## Requirements
 Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser.
-
-## Run locally
-```bash
-python -m venv .venv
-# Windows: .venv\\Scripts\\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r backend/requirements.txt
-uvicorn backend.main:app --reload
-```
-Open http://127.0.0.1:8000. Health check: `/api/health`.
 
 ## API
 - `GET /api/health`
 - `POST /api/analyze` multipart field `file`
 - `POST /api/export` multipart fields `file`, `start`, `end`
 
-Never commit API keys or `.env` files. Uploaded media is handled in temporary request directories. Do not send private footage to cloud services without consent.
+Never commit API keys or `.env` files. Do not send private footage to cloud services without consent.
