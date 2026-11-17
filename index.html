@@ -45,25 +45,23 @@
         <div class="preview-stage" id="preview-stage">
           <div class="preview-empty" id="preview-empty"><div class="play-emblem">▶</div><h3>Your story starts here.</h3><p>Import multiple videos to build a sequence.</p></div>
           <video id="video-preview" playsinline preload="metadata" hidden></video>
-          <div class="preview-overlay" id="preview-overlay" aria-label="Video playback controls">
-            <button class="overlay-control skip-control" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 12 7 12 7 2" /><path d="M8 12a17 17 0 1 1-1 17" /><path class="skip-arrow" d="M7 12 17 12 17 22" /><text x="24" y="29" text-anchor="middle">10</text></svg>
-            </button>
+          <div class="preview-overlay" id="preview-overlay" aria-label="Video playback control">
             <button class="overlay-control overlay-play" id="overlay-play-button" type="button" title="Play" aria-label="Play">
               <svg class="play-glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 10.5 37 24 17 37.5Z"/></svg>
               <svg class="pause-glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M15 11h7v26h-7zM27 11h7v26h-7z"/></svg>
-            </button>
-            <button class="overlay-control skip-control" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 12h10V2" /><path d="M40 12a17 17 0 1 0 1 17" /><path class="skip-arrow" d="M41 12 31 12 31 22" /><text x="24" y="29" text-anchor="middle">10</text></svg>
             </button>
           </div>
         </div>
         <div class="transport">
           <div class="transport-left">
             <button class="transport-button" id="previous-clip" title="Previous clip">|◀</button>
-            <button class="transport-button" id="jump-start">↤</button>
-            <button class="play-button" id="play-button">▶</button>
-            <button class="transport-button" id="jump-end">↦</button>
+            <button class="transport-button seek-transport" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 12 7 12 7 2"/><path d="M8 12a17 17 0 1 1-1 17"/><path d="M7 12 17 12 17 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
+            </button>
+            <button class="play-button" id="play-button" title="Play/Pause" aria-label="Play">▶</button>
+            <button class="transport-button seek-transport" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 12h10V2"/><path d="M40 12a17 17 0 1 0 1 17"/><path d="M41 12 31 12 31 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
+            </button>
             <button class="transport-button" id="next-clip" title="Next clip">▶|</button>
           </div>
           <div class="timecode"><span id="current-time">00:00.00</span><span class="time-divider">/</span><span id="total-time">00:00.00</span></div>
