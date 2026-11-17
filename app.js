@@ -8,6 +8,22 @@
   const short = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const selected = () => state.clips.find(c => c.id === state.selectedId) || null;
+  let controlsHideTimer = null;
+  function revealPreviewControls(autoHide = true) {
+    const stage = $('preview-stage');
+    if (!stage.classList.contains('has-video')) return;
+    stage.classList.add('controls-visible');
+    clearTimeout(controlsHideTimer);
+    if (autoHide && !video.paused) {
+      controlsHideTimer = setTimeout(() => {
+        if (!stage.matches(':hover') && !stage.contains(document.activeElement)) stage.classList.remove('controls-visible');
+      }, 2300);
+    }
+  }
+  function hidePreviewControls() {
+    clearTimeout(controlsHideTimer);
+    $('preview-stage').classList.remove('controls-visible');
+  }
   const toast = message => { const el=$('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>el.classList.remove('show'),3200); };
 
   async function checkHealth() {
@@ -52,7 +68,7 @@
   }
   function selectClip(id) {
     const c=state.clips.find(x=>x.id===id); if(!c)return;
-    state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video');
+    state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); revealPreviewControls(false);
     $('project-name').textContent='Untitled Project'; $('preview-resolution').textContent=`${c.width} × ${c.height}`;
     $('preview-hint').textContent=`CLIP ${state.clips.indexOf(c)+1} OF ${state.clips.length}`;
     video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=fmt(c.end-c.start);};
@@ -76,7 +92,7 @@
     const i=state.clips.findIndex(c=>c.id===id); if(i<0)return;
     const [c]=state.clips.splice(i,1); URL.revokeObjectURL(c.url);
     if(state.selectedId===id){state.selectedId=state.clips[Math.min(i,state.clips.length-1)]?.id||null;
-      if(state.selectedId)selectClip(state.selectedId);else{video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('total-time').textContent='00:00.00';$('current-time').textContent='00:00.00';}}
+      if(state.selectedId)selectClip(state.selectedId);else{video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video','is-playing','controls-visible');$('preview-empty').hidden=false;$('preview-resolution').textContent='NO MEDIA';$('total-time').textContent='00:00.00';$('current-time').textContent='00:00.00';}}
     render();
   }
   function moveClip(id,delta) {
@@ -136,10 +152,20 @@
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
   function syncPlaybackButtons(){
     const icon=video.paused?'▶':'Ⅱ',label=video.paused?'Play':'Pause';
-    $('play-button').textContent=icon;$('overlay-play-button').textContent=icon;
+    $('play-button').textContent=icon;
     $('overlay-play-button').title=label;$('overlay-play-button').setAttribute('aria-label',label);
+    $('preview-stage').classList.toggle('is-playing',!video.paused);
+    if (video.paused) revealPreviewControls(false);
+    else revealPreviewControls(true);
   }
   video.onplay=syncPlaybackButtons;video.onpause=syncPlaybackButtons;
+  const previewStage=$('preview-stage');
+  previewStage.addEventListener('pointerenter',()=>revealPreviewControls(false));
+  previewStage.addEventListener('pointermove',()=>revealPreviewControls(true));
+  previewStage.addEventListener('pointerleave',()=>{if(video.paused)hidePreviewControls();else{clearTimeout(controlsHideTimer);controlsHideTimer=setTimeout(hidePreviewControls,180);}});
+  previewStage.addEventListener('touchstart',()=>revealPreviewControls(true),{passive:true});
+  previewStage.addEventListener('focusin',()=>revealPreviewControls(false));
+  previewStage.addEventListener('focusout',()=>{if(!previewStage.matches(':hover'))hidePreviewControls();});
   $('overlay-play-button').onclick=()=>$('play-button').click();
   $('seek-backward').onclick=()=>{const c=selected();if(c)video.currentTime=Math.max(c.start,video.currentTime-10);};
   $('seek-forward').onclick=()=>{const c=selected();if(c)video.currentTime=Math.min(c.end,video.currentTime+10);};
