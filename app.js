@@ -60,7 +60,7 @@
     $('trim-start').value=Number(c.start.toFixed(2));
     $('trim-end').value=Number(c.end.toFixed(2));
     const values={scale:c.scale??1,rotation:c.rotation??0,x:c.x??0,y:c.y??0,opacity:c.opacity??1,speed:c.speed??1,volume:c.volume??1,fadeIn:c.fadeIn??0,fadeOut:c.fadeOut??0,brightness:c.brightness??0,contrast:c.contrast??1,saturation:c.saturation??1};
-    Object.entries(values).forEach(([key,value])=>{const el=$(`clip-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}`);if(el)el.value=key==='scale'||key==='speed'||key==='volume'||key==='opacity'?Math.round(value*(100)):value;});
+    Object.entries(values).forEach(([key,value])=>{const el=$(`clip-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}`);if(el)el.value=key==='scale'||key==='opacity'||key==='volume'?Math.round(value*100):value;});
     $('clip-scale-value').textContent=`${Math.round(values.scale*100)}%`;
     $('clip-rotation-value').textContent=`${values.rotation}°`;
     $('clip-opacity-value').textContent=`${Math.round(values.opacity*100)}%`;
