@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Personal Video Studio — v0.2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.2</span></a>
+    <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span></div>
+    <div class="top-actions">
+      <button class="button button-quiet" id="new-project">New</button>
+      <button class="button button-quiet" id="save-project">Save project</button>
+      <button class="button button-quiet" id="load-project">Open project</button>
+      <button class="button button-primary" id="export-button" disabled>Export selected ↗</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="panel media-panel">
+      <div class="panel-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>Media Library</h2></div></div>
+      <button class="import-drop" id="video-drop">
+        <span class="upload-icon">↑</span><strong>Import videos</strong>
+        <small>Drop multiple videos or browse</small><span class="format-note">MP4 · MOV · WEBM · MKV</span>
+      </button>
+      <input id="video-input" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.webm,.mkv" multiple hidden>
+      <button class="import-audio" id="audio-import">＋ Add background audio</button>
+      <input id="audio-input" type="file" accept="audio/*" hidden>
+      <div class="media-section-title"><span>PROJECT MEDIA</span><span id="media-count">0 ITEMS</span></div>
+      <div id="media-list" class="media-list"><div class="empty-media"><span>▧</span><p>Your imported media<br>will appear here.</p></div></div>
+      <div class="storage-note"><i class="status-dot"></i> Files stay in this editing session</div>
+    </aside>
+
+    <section class="center-column">
+      <section class="preview-panel panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">CANVAS</span><h2>Preview Monitor</h2></div>
+          <div class="preview-meta"><span id="preview-resolution">NO MEDIA</span><span class="live-pill">LOCAL PREVIEW</span></div>
+        </div>
+        <div class="preview-stage">
+          <div class="preview-empty" id="preview-empty"><div class="play-emblem">▶</div><h3>Your story starts here.</h3><p>Import multiple videos to build a sequence.</p></div>
+          <video id="video-preview" playsinline preload="metadata" hidden></video>
+        </div>
+        <div class="transport">
+          <div class="transport-left">
+            <button class="transport-button" id="previous-clip" title="Previous clip">|◀</button>
+            <button class="transport-button" id="jump-start">↤</button>
+            <button class="play-button" id="play-button">▶</button>
+            <button class="transport-button" id="jump-end">↦</button>
+            <button class="transport-button" id="next-clip" title="Next clip">▶|</button>
+          </div>
+          <div class="timecode"><span id="current-time">00:00.00</span><span class="time-divider">/</span><span id="total-time">00:00.00</span></div>
+          <span class="preview-hint" id="preview-hint">SELECT A CLIP</span>
+        </div>
+      </section>
+
+      <section class="timeline-panel panel">
+        <div class="panel-heading">
+          <div><span class="eyebrow">EDITING</span><h2>Sequence Timeline</h2></div>
+          <div class="timeline-tools"><span class="timeline-scale" id="sequence-duration">00:00 TOTAL</span><button class="icon-button small" id="fit-timeline" title="Fit timeline">⌗</button></div>
+        </div>
+        <div class="track-label">VIDEO SEQUENCE <span>Drag clips in the library? Use ↑ / ↓ to reorder.</span></div>
+        <div class="timeline-tracks"><div class="track video-track" id="video-track"><div class="track-placeholder" id="track-placeholder">Import videos to create your sequence</div><div id="timeline-clips" class="timeline-clips"></div></div>
+          <div class="track audio-track"><span class="audio-placeholder">♫ BACKGROUND AUDIO</span><span id="audio-track-name"></span></div></div>
+        <div class="timeline-footer"><span><i class="legend-dot video-dot"></i> Video clips</span><span><i class="legend-dot audio-dot"></i> Audio bed</span><span id="timeline-status">No clips loaded</span></div>
+      </section>
+    </section>
+
+    <aside class="right-column">
+      <section class="panel inspector-panel">
+        <div class="panel-heading"><div><span class="eyebrow">CLIP SETTINGS</span><h2>Inspector</h2></div><span class="inspector-icon">⌘</span></div>
+        <div class="inspector-empty" id="inspector-empty"><span>◈</span><p>Select a clip in your media<br>library to inspect it.</p></div>
+        <div id="inspector-content" hidden>
+          <div class="property-group"><label>FILE NAME</label><div class="property-value" id="property-filename">—</div></div>
+          <div class="property-grid">
+            <div class="property-group"><label>DURATION</label><div class="property-value" id="property-duration">—</div></div>
+            <div class="property-group"><label>RESOLUTION</label><div class="property-value" id="property-resolution">—</div></div>
+          </div>
+          <div class="property-group"><label>TRIM IN</label><div class="number-input"><input id="trim-start" type="number" min="0" step="0.1" value="0"><span>sec</span></div></div>
+          <div class="property-group"><label>TRIM OUT</label><div class="number-input"><input id="trim-end" type="number" min="0" step="0.1" value="0"><span>sec</span></div></div>
+          <button class="button button-secondary full-width" id="apply-trim">Apply trim points</button>
+          <div class="clip-actions">
+            <button class="button button-quiet" id="move-left">↑ Move up</button><button class="button button-quiet" id="move-right">↓ Move down</button>
+            <button class="button button-danger" id="remove-clip">Remove clip</button>
+          </div>
+          <p class="field-help">Trim values are applied to this clip in the sequence.</p>
+        </div>
+      </section>
+
+      <section class="panel director-panel">
+        <div class="director-top"><div><span class="eyebrow">CREATIVE ASSISTANT</span><h2>AI Director</h2></div><span class="coming-soon">ROADMAP</span></div>
+        <div class="director-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="director-core">✳</div><span class="spark spark-one">✦</span><span class="spark spark-two">✧</span></div>
+        <h3>Your creative partner.</h3>
+        <p>AI scene understanding and automatic creative edit decisions are planned for a later release.</p>
+        <div class="director-capabilities"><span>Scene understanding</span><span>Creative cut decisions</span><span>Motion graphics</span><span>Color & sound</span></div>
+        <div class="notice"><span>i</span><p>AI editing is not active yet. v0.2 provides a multi-clip editing foundation, not AI-generated edits.</p></div>
+      </section>
+    </aside>
+  </main>
+  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.2.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><span>LOCAL-FIRST WORKSPACE</span></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input id="project-input" type="file" accept=".pvsproject,.json,application/json" hidden>
+<script src="./app.js"></script>
+</body></html>
