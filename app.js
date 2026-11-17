@@ -60,7 +60,7 @@
     $('trim-start').value=Number(c.start.toFixed(2));
     $('trim-end').value=Number(c.end.toFixed(2));
     const values={scale:c.scale??1,rotation:c.rotation??0,x:c.x??0,y:c.y??0,opacity:c.opacity??1,speed:c.speed??1,volume:c.volume??1,fadeIn:c.fadeIn??0,fadeOut:c.fadeOut??0,brightness:c.brightness??0,contrast:c.contrast??1,saturation:c.saturation??1};
-    Object.entries(values).forEach(([key,value])=>{const el=$(`clip-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}`);if(el)el.value=key==='scale'||key==='speed'||key==='volume'||key==='opacity'?Math.round(value*(key==='scale'||key==='speed'?100:100)):value;});
+    Object.entries(values).forEach(([key,value])=>{const el=$(`clip-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}`);if(el)el.value=key==='scale'||key==='speed'||key==='volume'||key==='opacity'?Math.round(value*(100)):value;});
     $('clip-scale-value').textContent=`${Math.round(values.scale*100)}%`;
     $('clip-rotation-value').textContent=`${values.rotation}°`;
     $('clip-opacity-value').textContent=`${Math.round(values.opacity*100)}%`;
@@ -146,9 +146,9 @@
       const r=await fetch(apiUrl('/api/capabilities'));if(!r.ok)throw new Error();const caps=await r.json();state.capabilities=caps;
       const format=$('export-format'),selectedFormat=format.value;
       Array.from(format.options).forEach(o=>{const ok=!!caps.formats?.[o.value];o.disabled=!ok;o.hidden=!ok;});
-      if(!caps.formats?.[selectedFormat])format.value=Object.keys(caps.formats||{}).find(k=>caps.formats[k])||'mp4';
+      if(!caps.formats?.[selectedFormat])format.value=Object.keys(caps.formats||{}).find(k=>caps.formats[k])||'';$('export-start').disabled=!Object.values(caps.formats||{}).some(Boolean);
       $('export-capability-note').textContent='Formats are enabled only when the connected FFmpeg engine has the required encoder.';
-    }catch{$('export-capability-note').textContent='Could not read engine capabilities. Reconnect the engine and try again.';}
+    }catch{Array.from($('export-format').options).forEach(o=>{o.disabled=true;o.hidden=true;});$('export-start').disabled=true;$('export-capability-note').textContent='Could not read engine capabilities. Reconnect the engine and try again.';}
   }
   async function exportSequence() {
     if (!state.clips.length || state.exporting) return;
