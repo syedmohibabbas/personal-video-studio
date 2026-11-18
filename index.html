@@ -37,10 +37,10 @@
     </aside>
     <aside class="panel media-panel">
       <div class="panel-heading"><div class="panel-title-wrap"><h2>Media Library</h2></div><div class="media-heading-actions"><button class="panel-menu" id="media-search" type="button" title="Search media">⌕</button><button class="panel-menu" id="media-filter" type="button" title="Filter media">▽</button></div></div>
-      <button class="import-drop" id="video-drop">
+      <button class="import-drop" id="video-drop" type="button">
         <span class="upload-icon">↑</span><strong>Import Media</strong><span class="import-chevron">⌄</span><small>MP4 · MOV · WEBM · MKV</small>
       </button>
-      <input id="video-input" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.webm,.mkv" multiple hidden>
+      <input id="video-input" type="file" accept="video/*,.mp4,.mov,.webm,.mkv,.m4v" multiple hidden>
       <button class="import-audio legacy-audio-import" id="audio-import">＋ Add background audio</button>
       <label class="audio-volume-control legacy-audio-volume" for="audio-volume">MUSIC VOLUME <span id="audio-volume-value">35%</span><input id="audio-volume" type="range" min="0" max="100" value="35"></label>
       <input id="audio-input" type="file" accept="audio/*" hidden>
