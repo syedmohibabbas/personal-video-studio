@@ -1,17 +1,18 @@
 from __future__ import annotations
-import json, shutil, subprocess, tempfile
+import json, os, shutil, subprocess, tempfile, threading
 from pathlib import Path
 from typing import Annotated
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.background import BackgroundTask
+from starlette.concurrency import run_in_threadpool
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'.mp4', '.mov', '.webm', '.mkv'}
-app = FastAPI(title='Personal Video Studio API', version='0.5.0')
+app = FastAPI(title='Personal Video Studio API', version='0.6.0')
 app.add_middleware(CORSMiddleware, allow_origins=['https://syedmohibabbas.github.io'], allow_origin_regex=r'https?://(localhost|127\.0\.0\.1)(:\d+)?', allow_credentials=False, allow_methods=['GET','POST'], allow_headers=['*'])
 
 def tool(name: str): return shutil.which(name)
@@ -33,6 +34,78 @@ async def save_upload(upload: UploadFile, destination: Path):
 def run(cmd):
     try: return subprocess.run(cmd, capture_output=True, text=True, timeout=3600, check=False)
     except subprocess.TimeoutExpired as exc: raise HTTPException(504, 'Media processing timed out.') from exc
+
+
+# Optional local AI speech recognition. Model downloads on first transcription request.
+WHISPER_MODEL_SIZE = os.getenv('PVS_WHISPER_MODEL', 'small')
+WHISPER_DEVICE = os.getenv('PVS_WHISPER_DEVICE', 'cpu')
+WHISPER_COMPUTE_TYPE = os.getenv('PVS_WHISPER_COMPUTE_TYPE', 'int8')
+WHISPER_CACHE = os.getenv('PVS_MODEL_CACHE', '/var/cache/pvs-whisper')
+_whisper_model = None
+_whisper_lock = threading.Lock()
+
+def get_whisper_model():
+    global _whisper_model
+    if _whisper_model is None:
+        with _whisper_lock:
+            if _whisper_model is None:
+                try:
+                    from faster_whisper import WhisperModel
+                except ImportError as exc:
+                    raise HTTPException(503, 'AI speech model is not installed. Rebuild the backend with the current requirements.') from exc
+                Path(WHISPER_CACHE).mkdir(parents=True, exist_ok=True)
+                _whisper_model = WhisperModel(WHISPER_MODEL_SIZE, device=WHISPER_DEVICE,
+                                              compute_type=WHISPER_COMPUTE_TYPE,
+                                              download_root=WHISPER_CACHE)
+    return _whisper_model
+
+def srt_timestamp(seconds: float) -> str:
+    millis = max(0, round(seconds * 1000))
+    hours, millis = divmod(millis, 3_600_000)
+    minutes, millis = divmod(millis, 60_000)
+    secs, millis = divmod(millis, 1000)
+    return f'{hours:02}:{minutes:02}:{secs:02},{millis:03}'
+
+def transcribe_to_srt(source: Path, language: str | None):
+    model = get_whisper_model()
+    segments, info = model.transcribe(str(source), language=language, vad_filter=True,
+                                      beam_size=5, condition_on_previous_text=False)
+    rows = []
+    for index, segment in enumerate(segments, 1):
+        text = (segment.text or '').strip()
+        if text:
+            rows.append(f'{index}\n{srt_timestamp(segment.start)} --> {srt_timestamp(segment.end)}\n{text}')
+    return '\n\n'.join(rows) + ('\n' if rows else ''), info.language, info.language_probability, len(rows)
+
+@app.get('/api/ai/status')
+def ai_status():
+    try:
+        import importlib.util
+        installed = importlib.util.find_spec('faster_whisper') is not None
+    except (ImportError, ValueError):
+        installed = False
+    return {'speech_to_text': installed, 'provider': 'faster-whisper', 'model': WHISPER_MODEL_SIZE,
+            'device': WHISPER_DEVICE, 'model_loaded': _whisper_model is not None,
+            'first_run_download': installed and _whisper_model is None}
+
+@app.post('/api/transcribe')
+async def transcribe(file: Annotated[UploadFile, File()],
+                     language: Annotated[str, Form()] = 'auto'):
+    if Path(file.filename or '').suffix.lower() not in ALLOWED_EXTENSIONS:
+        raise HTTPException(400, 'Upload an MP4, MOV, WEBM or MKV video.')
+    selected_language = None if language.strip().lower() in {'', 'auto'} else language.strip().lower()
+    if selected_language and (len(selected_language) not in (2, 3) or not selected_language.isalpha()):
+        raise HTTPException(400, 'Use auto or a valid two/three-letter language code.')
+    with tempfile.TemporaryDirectory(prefix='pvs-transcribe-') as td:
+        source = Path(td) / ('source' + Path(file.filename or '').suffix.lower())
+        await save_upload(file, source)
+        srt, detected, confidence, count = await run_in_threadpool(transcribe_to_srt, source, selected_language)
+        if not srt.strip():
+            raise HTTPException(422, 'No speech was detected in this video.')
+        headers = {'Content-Disposition': f'attachment; filename="{Path(file.filename or "video").stem}-captions.srt"',
+                   'X-Detected-Language': detected, 'X-Segment-Count': str(count),
+                   'X-Language-Confidence': f'{confidence:.3f}'}
+        return PlainTextResponse(srt, media_type='application/x-subrip; charset=utf-8', headers=headers)
 
 @app.get('/api/health')
 def health(): return {'status':'online','version':app.version,'ffmpeg_available':bool(tool('ffmpeg')),'ffprobe_available':bool(tool('ffprobe'))}
