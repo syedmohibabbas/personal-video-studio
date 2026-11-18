@@ -173,9 +173,10 @@ async def export_sequence(
     ffmpeg, ffprobe = require_tools()
     if not files or len(files) > 30:
         raise HTTPException(400, 'Add between 1 and 30 clips to export.')
-    if aspect not in {'landscape', 'portrait'}:
-        raise HTTPException(400, 'Aspect must be landscape or portrait.')
-    if resolution not in {'source', '720', '1080', '1440', '2160'}:
+    aspect_ratios = {'16:9': 16/9, '9:16': 9/16, '4:5': 4/5, '1:1': 1.0, '1.91:1': 1.91, '4:3': 4/3, '3:2': 3/2, '5:4': 5/4, '2:1': 2.0, '21:9': 21/9, '2.39:1': 2.39}
+    if aspect not in aspect_ratios:
+        raise HTTPException(400, 'Unsupported aspect ratio.')
+    if resolution not in {'source', '480', '576', '720', '1080', '1440', '2160', '4320'}:
         raise HTTPException(400, 'Unsupported output resolution.')
     if format not in {'mp4', 'mov', 'mkv', 'webm', 'avi', 'gif'}:
         raise HTTPException(400, 'Unsupported output format.')
@@ -245,15 +246,13 @@ async def export_sequence(
                                'brightness': brightness, 'contrast': contrast, 'saturation': saturation,
                                'volume': volume, 'fadeIn': fade_in, 'fadeOut': fade_out})
 
-        if resolution == 'source':
-            width, height = first_width, first_height
-            if aspect == 'portrait' and width > height: width, height = height, width
-            if aspect == 'landscape' and height > width: width, height = height, width
-            width, height = max(2, width // 2 * 2), max(2, height // 2 * 2)
+        ratio = aspect_ratios[aspect]
+        long_edge = max(first_width, first_height) if resolution == 'source' else {'480': 854, '576': 1024, '720': 1280, '1080': 1920, '1440': 2560, '2160': 3840, '4320': 7680}[resolution]
+        if ratio >= 1:
+            width, height = long_edge, round(long_edge / ratio)
         else:
-            long_edge = {'720': 1280, '1080': 1920, '1440': 2560, '2160': 3840}[resolution]
-            width, height = (long_edge, round(long_edge * 9 / 16)) if aspect == 'landscape' else (round(long_edge * 9 / 16), long_edge)
-            width, height = width // 2 * 2, height // 2 * 2
+            width, height = round(long_edge * ratio), long_edge
+        width, height = max(2, width // 2 * 2), max(2, height // 2 * 2)
 
         music_path = None
         if audio is not None and audio.filename:
