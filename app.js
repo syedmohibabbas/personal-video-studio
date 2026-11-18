@@ -445,7 +445,7 @@
   document.querySelectorAll('[data-workspace]').forEach(button=>button.addEventListener('click',()=>{
     document.querySelectorAll('[data-workspace]').forEach(b=>b.classList.toggle('workspace-active',b===button));
     const target=button.dataset.workspace;
-    const destination=target==='color'?$('[id="clip-brightness"]').closest('.inspector-section'):target==='audio'?$('[id="clip-volume"]').closest('.inspector-section'):document.querySelector('.timeline-panel');
+    const destination=target==='color'?$('clip-brightness').closest('.inspector-section'):target==='audio'?$('clip-volume').closest('.inspector-section'):document.querySelector('.timeline-panel');
     if(destination){destination.scrollIntoView({behavior:'smooth',block:'center'});if(target!=='editing'&&!selected())toast('Select a clip to use '+target+' controls.');}
   }));
 
