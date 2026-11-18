@@ -4,14 +4,12 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0d12">
   <title>Personal Video Studio — v0.5</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>PERSONAL <b>VIDEO STUDIO</b></span><span class="version">v0.5</span></a>
+    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>Personal Video Studio</span><span class="version">v0.5</span></a>
     <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span><button class="rename-project-button" id="rename-project" type="button" title="Rename project" aria-label="Rename project">✎</button></div>
     <div class="top-actions">
       <button class="button button-quiet" id="new-project">New</button>
@@ -20,10 +18,14 @@
       <button class="button button-primary" id="export-button" disabled>Export sequence ↗</button>
     </div>
   </header>
+  <nav class="app-menubar" aria-label="Application menu">
+    <div class="menu-items"><span>File</span><span>Edit</span><span>Clip</span><span>Sequence</span><span>Markers</span><span>Graphics</span><span>View</span><span>Window</span><span>Help</span></div>
+    <div class="workspace-switcher"><span class="workspace-label">WORKSPACE</span><span class="workspace-active">Editing</span><span>Color</span><span>Audio</span></div>
+  </nav>
 
   <main class="workspace">
     <aside class="panel media-panel">
-      <div class="panel-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h2>Media Library</h2></div></div>
+      <div class="panel-heading"><div class="panel-title-wrap"><span class="eyebrow">PROJECT</span><h2>Project</h2></div><button class="panel-menu" type="button" aria-label="Project panel options">☰</button></div>
       <button class="import-drop" id="video-drop">
         <span class="upload-icon">↑</span><strong>Import videos</strong>
         <small>Drop multiple videos or browse</small><span class="format-note">MP4 · MOV · WEBM · MKV</span>
@@ -40,7 +42,7 @@
     <section class="center-column">
       <section class="preview-panel panel">
         <div class="panel-heading">
-          <div><h2>Preview</h2></div>
+          <div class="monitor-heading"><span class="eyebrow">PROGRAM MONITOR</span><h2>Program: Sequence 01</h2></div>
           <div class="preview-meta"><button class="fullscreen-preview-button" id="fullscreen-preview" type="button" title="Full screen preview" aria-label="Open full screen preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg><span>Full screen</span></button></div>
         </div>
         <div class="preview-stage aspect-landscape" id="preview-stage">
@@ -79,7 +81,7 @@
 
       <section class="timeline-panel panel">
         <div class="panel-heading">
-          <div><span class="eyebrow">EDITING</span><h2>Sequence Timeline</h2></div>
+          <div><span class="eyebrow">SEQUENCE 01</span><h2>Timeline</h2></div>
           <div class="timeline-tools"><span class="timeline-scale" id="sequence-duration">00:00 TOTAL</span><button class="icon-button small" id="fit-timeline" title="Fit timeline">⌗</button></div>
         </div>
         <div class="track-label">VIDEO SEQUENCE <span>Drag clips left or right to reorder your sequence.</span></div>
@@ -91,7 +93,7 @@
 
     <aside class="right-column">
       <section class="panel inspector-panel">
-        <div class="panel-heading"><div><span class="eyebrow">CLIP SETTINGS</span><h2>Inspector</h2></div><span class="inspector-icon">⌘</span></div>
+        <div class="panel-heading"><div><span class="eyebrow">SELECTED CLIP</span><h2>Effect Controls</h2></div><button class="panel-menu" type="button" aria-label="Effect Controls panel options">☰</button></div>
         <div class="inspector-empty" id="inspector-empty"><span>◈</span><p>Select a clip in your media<br>library to inspect it.</p></div>
         <div id="inspector-content" hidden>
           <div class="property-group"><label>FILE NAME</label><div class="property-value" id="property-filename">—</div></div>
