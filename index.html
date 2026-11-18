@@ -89,21 +89,29 @@
         <div class="transport">
           <div class="timecode"><span id="current-time">00:00:00:00</span><span class="time-divider">/</span><span id="total-time">00:00:00:00</span></div>
           <div class="transport-left">
-            <button class="transport-button" id="previous-clip" title="Previous clip">|◀</button>
-            <button class="play-button" id="play-button" title="Play/Pause" aria-label="Play">▶</button>
-            <button class="transport-button" id="next-clip" title="Next clip">▶|</button>
-            <button class="transport-button seek-transport legacy-seek" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 12 7 12 7 2"/><path d="M8 12a17 17 0 1 1-1 17"/><path d="M7 12 17 12 17 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
-            </button>
-            <button class="transport-button seek-transport legacy-seek" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">
-              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 12h10V2"/><path d="M40 12a17 17 0 1 0 1 17"/><path d="M41 12 31 12 31 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
-            </button>
+            <button class="transport-button seek-transport" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 10v28L27 24 7 10Z"/><path d="M25 10v28L45 24 25 10Z"/></svg></button>
+            <button class="play-button" id="play-button" title="Play/Pause" aria-label="Play"><svg class="transport-play-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 10.5 38 24 17 37.5Z"/></svg><svg class="transport-pause-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M15 11h7v26h-7zM27 11h7v26h-7z"/></svg></button>
+            <button class="transport-button seek-transport" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M41 10v28L21 24 41 10Z"/><path d="M23 10v28L3 24 23 10Z"/></svg></button>
+            <button class="transport-button clip-step-button" id="previous-clip" title="Previous clip">|◀</button>
+            <button class="transport-button clip-step-button" id="next-clip" title="Next clip">▶|</button>
             </div>
           <div class="preview-right-controls"><span id="preview-hint" hidden></span>
             <button class="transport-button" id="mute-preview" type="button" title="Mute preview">◖</button><button class="transport-button" id="fullscreen-preview" type="button" title="Full screen preview">⛶</button>
-            <div class="aspect-controls" role="group" aria-label="Preview aspect ratio">
-              <button class="aspect-button is-active" id="aspect-landscape" type="button" title="Landscape 16:9" aria-label="Landscape 16:9" aria-pressed="true">16:9</button><button class="aspect-button" id="aspect-portrait" type="button" title="Portrait 9:16" aria-label="Portrait 9:16" aria-pressed="false">9:16</button>
-            </div>
+            <label class="aspect-select-wrap" title="Choose a social media video canvas"><span>FORMAT</span><select id="aspect-format" aria-label="Video aspect ratio">
+              <optgroup label="Popular social formats">
+                <option value="16:9" selected>16:9 · YouTube / Landscape</option>
+                <option value="9:16">9:16 · Reels / Shorts / TikTok</option>
+                <option value="4:5">4:5 · Instagram / Facebook Feed</option>
+                <option value="1:1">1:1 · Square Post</option>
+                <option value="1.91:1">1.91:1 · Facebook / LinkedIn Link</option>
+                <option value="4:3">4:3 · Classic</option>
+              </optgroup>
+              <optgroup label="Other video ratios">
+                <option value="3:2">3:2 · Photo / Video</option><option value="5:4">5:4 · Feed</option>
+                <option value="2:1">2:1 · Wide</option><option value="21:9">21:9 · Ultra-wide</option>
+                <option value="2.39:1">2.39:1 · Cinema</option>
+              </optgroup>
+            </select></label>
           </div>
         </div>
       </section>
@@ -207,7 +215,7 @@
 <div class="export-backdrop" id="export-dialog" hidden>
   <section class="export-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="export-title">
     <div class="export-dialog-heading"><div><span class="eyebrow">RENDER SETTINGS</span><h2 id="export-title">Export sequence</h2></div><button id="export-close" class="export-close" type="button" aria-label="Close export settings">×</button></div>
-    <div class="export-setting"><label for="export-resolution">Resolution</label><select id="export-resolution"><option value="source">Match source</option><option value="720">HD · 720p</option><option value="1080" selected>Full HD · 1080p</option><option value="1440">2K · 1440p</option><option value="2160">4K · 2160p</option></select></div>
+    <div class="export-setting"><label for="export-resolution">Resolution</label><select id="export-resolution"><option value="source">Match source</option><option value="480">SD · 480p</option><option value="576">SD · 576p</option><option value="720">HD · 720p</option><option value="1080" selected>Full HD · 1080p</option><option value="1440">2K · 1440p</option><option value="2160">4K · 2160p</option><option value="4320">8K · 4320p</option></select></div>
     <div class="export-setting"><label for="export-format">File format</label><select id="export-format"><option value="mp4" disabled>MP4 · H.264</option><option value="mov" disabled>MOV · H.264</option><option value="mkv" disabled>MKV · H.264</option><option value="webm" disabled>WebM · VP9</option><option value="avi" disabled>AVI · MPEG-4</option><option value="gif" disabled>GIF · Animated</option></select></div>
     <div class="export-setting"><label for="export-quality">Quality</label><select id="export-quality"><option value="high">High quality</option><option value="balanced" selected>Balanced</option><option value="small">Smaller file</option></select></div>
     <p class="export-note" id="export-capability-note">Available options are checked against the connected FFmpeg engine.</p>
