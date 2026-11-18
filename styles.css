@@ -880,3 +880,10 @@ body.light-theme .project-chip,body.light-theme .director-controls label,body.li
 button{transition:filter .14s ease,border-color .14s ease,background-color .14s ease,transform .14s ease}
 button:active:not(:disabled){transform:scale(.96)}
 @media(max-width:760px){.aspect-select-wrap select{max-width:140px}.transport-left .clip-step-button{display:none}}
+
+/* Ensure every selected aspect preset changes the actual monitor canvas. */
+.preview-stage{position:relative;flex:0 1 auto;width:auto;height:min(58vh,520px);max-width:100%;min-height:0;aspect-ratio:var(--preview-ratio,16/9);align-self:center}
+.preview-stage.aspect-portrait{width:auto;height:min(58vh,520px);max-width:100%;min-height:0;aspect-ratio:var(--preview-ratio,9/16);flex:0 1 auto;align-self:center}
+.preview-stage.aspect-landscape{width:auto;height:min(58vh,520px);max-width:100%;min-height:0;aspect-ratio:var(--preview-ratio,16/9);flex:0 1 auto;align-self:center}
+.preview-stage video{width:100%;height:100%;object-fit:contain}
+.import-drop{position:relative;z-index:2;pointer-events:auto;touch-action:manipulation}
