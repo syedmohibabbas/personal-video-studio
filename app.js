@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', apiKey: localStorage.getItem('pvs_api_key') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null, activePreset: null };
+  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: '16:9', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', apiKey: localStorage.getItem('pvs_api_key') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null, activePreset: null };
   const video = $('video-preview');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
@@ -185,7 +185,7 @@
       if(data.format!=='PVS_PROJECT'||!Array.isArray(data.clips))throw new Error('This is not a valid PVS project file.');
       toast('Project settings loaded. Re-import the source videos; saved trim points will be restored by filename.');
       state.projectName = String(data.projectName || file.name.replace(/\.(pvsproject|json)$/i,''));
-      state.previewAspect = data.previewAspect === 'portrait' ? 'portrait' : 'landscape';
+      state.previewAspect = data.previewAspect === 'portrait' ? '9:16' : (data.previewAspect === 'landscape' ? '16:9' : (data.previewAspect || '16:9'));
       state.audioVolume = Number.isFinite(Number(data.audioVolume)) ? Math.max(0,Math.min(1,Number(data.audioVolume))) : 0.35;
       $('audio-volume').value = Math.round(state.audioVolume * 100);
       $('audio-volume-value').textContent = `${Math.round(state.audioVolume * 100)}%`;
@@ -230,17 +230,16 @@
     } catch (error) { toast(error.message || 'Sequence export failed.'); }
     finally {state.exporting=false;$('export-button').textContent='Export sequence ↗';$('export-start').disabled=!state.backendOnline || !Object.values(state.capabilities?.formats||{}).some(Boolean);$('export-start').textContent='Render & download ↗';render();}
   }
-  const previewAspectButtons = { landscape: $('aspect-landscape'), portrait: $('aspect-portrait') };
+  const aspectRatios = {'16:9':16/9,'9:16':9/16,'4:5':4/5,'1:1':1,'1.91:1':1.91,'4:3':4/3,'3:2':3/2,'5:4':5/4,'2:1':2,'21:9':21/9,'2.39:1':2.39};
   function setPreviewAspect(mode) {
+    const ratio = aspectRatios[mode] ? mode : (mode === 'portrait' ? '9:16' : '16:9');
     const stage = $('preview-stage');
-    const portrait = mode === 'portrait';
-    state.previewAspect = portrait ? 'portrait' : 'landscape';
-    stage.classList.toggle('aspect-portrait', portrait);
-    stage.classList.toggle('aspect-landscape', !portrait);
-    previewAspectButtons.landscape.classList.toggle('is-active', !portrait);
-    previewAspectButtons.portrait.classList.toggle('is-active', portrait);
-    previewAspectButtons.landscape.setAttribute('aria-pressed', String(!portrait));
-    previewAspectButtons.portrait.setAttribute('aria-pressed', String(portrait));
+    state.previewAspect = ratio;
+    stage.style.setProperty('--preview-ratio', String(aspectRatios[ratio]));
+    stage.classList.toggle('aspect-portrait', aspectRatios[ratio] < 1);
+    stage.classList.toggle('aspect-landscape', aspectRatios[ratio] >= 1);
+    $('aspect-format').value = ratio;
+    $('aspect-format').title = 'Preview and export: '+ratio;
   }
   async function openFullscreenPreview() {
     const stage = $('preview-stage');
@@ -257,8 +256,7 @@
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && document.fullscreenElement === $('preview-stage')) closeFullscreenPreview();
   });
-  $('aspect-landscape').onclick = () => setPreviewAspect('landscape');
-  $('aspect-portrait').onclick = () => setPreviewAspect('portrait');
+  $('aspect-format').onchange = event => setPreviewAspect(event.target.value);
 
   $('rename-project').onclick = () => {
     const next = prompt('Enter project name:', state.projectName);
