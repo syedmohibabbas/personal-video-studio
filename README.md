@@ -35,10 +35,10 @@ A local-first browser video editing workspace with multi-clip sequencing, a clip
 - Project files save edit settings and source filenames, **not the original media files**. Re-import source videos after reopening. Background audio must also be re-imported.
 - Export requires the FastAPI backend and FFmpeg/FFprobe. GitHub Pages serves only the static frontend. Use **Connect engine** to enter the separately hosted FastAPI backend URL.
 - This is not yet a complete AI editing system. AI scene understanding, automatic creative decisions, motion graphics generation, advanced transitions, multi-track editing, and advanced color tools remain future work.
-- Do not expose a personal backend publicly without authentication, upload limits appropriate to the deployment, and resource controls.
+- Set a long random `PVS_API_KEY` secret on any internet-accessible backend. Enter the same key when using **Connect engine**; it is stored only in that browser's local storage and is never committed to GitHub. The backend accepts unauthenticated processing requests only when `PVS_API_KEY` is unset (local development mode). Also configure upload limits, rate limits, disk quotas and resource controls before public production use.
 
 ## Requirements
-Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser. For the Docker backend, build with `docker build -t personal-video-studio .` and run with `docker run -p 10000:10000 -e PORT=10000 -v pvs-model-cache:/var/cache/pvs-whisper personal-video-studio`. The first transcription downloads the Whisper model; allow outbound network access and sufficient disk/RAM. CPU inference is slower than a supported GPU.
+Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser. For the Docker backend, build with `docker build -t personal-video-studio .` and run with `docker run -p 10000:10000 -e PORT=10000 -e PVS_API_KEY=replace-with-a-long-random-secret -v pvs-model-cache:/var/cache/pvs-whisper personal-video-studio`. The first transcription downloads the Whisper model; allow outbound network access and sufficient disk/RAM. CPU inference is slower than a supported GPU.
 
 ## API
 - `GET /api/health`
