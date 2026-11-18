@@ -25,6 +25,15 @@
       if (!r.ok) throw new Error();
       const d = await r.json(); state.backendOnline = true;
       $('backend-status').innerHTML = `<i class="status-dot"></i> ENGINE ${esc(String(d.status || 'ONLINE').toUpperCase())}${d.ffmpeg_available ? ' · FFMPEG READY' : ' · FFMPEG MISSING'}`;
+      try {
+        const aiResponse = await fetch(apiUrl('/api/ai/status'));
+        if (aiResponse.ok) {
+          const ai = await aiResponse.json();
+          $('ai-status-note').textContent = ai.speech_to_text
+            ? `Whisper AI ready · ${ai.model} model · ${ai.device}. First use downloads the model if needed.`
+            : 'Video engine connected. Rebuild backend with the AI requirements to enable Whisper captions.';
+        }
+      } catch {}
       render();
     } catch {
       state.backendOnline = false;
