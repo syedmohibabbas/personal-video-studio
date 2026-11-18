@@ -845,3 +845,13 @@ body.light-theme .project-chip,body.light-theme .director-controls label,body.li
 .audio-waveform i{display:block;flex:1;min-width:1px;max-height:100%;border-radius:2px;background:#24c6a3;opacity:.9}
 .caption-block{flex:1 1 0;min-width:85px}
 @media(max-width:760px){.graphics-presets{max-height:260px;overflow:auto}}
+
+
+.project-control{position:relative;display:flex;align-items:center}
+.project-chip{padding-right:4px}
+.project-menu-button{height:34px;width:26px;border:0;border-radius:6px;background:transparent;color:#aeb5c9}
+.project-menu-button:hover{background:#24283b;color:white}
+.project-menu-popup{position:absolute;top:42px;left:0;z-index:80;min-width:170px;padding:5px;border:1px solid #343a53;border-radius:8px;background:#202438;box-shadow:0 12px 28px #0008}
+.project-menu-popup button{display:block;width:100%;padding:9px 10px;border:0;border-radius:5px;background:transparent;color:#e5e8f2;text-align:left;font-size:11px}
+.project-menu-popup button:hover{background:#39305b}
+.audio-waveform[hidden]{display:none!important}
