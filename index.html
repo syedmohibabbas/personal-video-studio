@@ -36,6 +36,28 @@
       <input id="audio-input" type="file" accept="audio/*" hidden>
       <div class="media-section-title"><span>PROJECT MEDIA</span><span id="media-count">0 ITEMS</span></div>
       <div id="media-list" class="media-list"><div class="empty-media"><span>▧</span><p>Your imported media<br>will appear here.</p></div></div>
+      <section class="graphics-presets">
+        <div class="presets-heading"><span class="eyebrow">GRAPHICS WORKSPACE</span><h3>Effects & Presets</h3></div>
+        <label class="preset-text-label" for="graphic-text">TITLE / CAPTION TEXT</label>
+        <input id="graphic-text" class="preset-text-input" type="text" maxlength="90" placeholder="Type your title or caption">
+        <div class="preset-category-label">MOTION GRAPHICS</div>
+        <div class="preset-grid">
+          <button type="button" data-preset="caption-pop"><b>Caption Pop</b><small>Bold subtitle</small></button>
+          <button type="button" data-preset="caption-box"><b>Clean Caption</b><small>Box subtitle</small></button>
+          <button type="button" data-preset="karaoke"><b>Karaoke</b><small>Highlight style</small></button>
+          <button type="button" data-preset="title-bold"><b>Bold Title</b><small>Center title</small></button>
+          <button type="button" data-preset="title-cinematic"><b>Cinematic</b><small>Film title</small></button>
+          <button type="button" data-preset="lower-third"><b>Lower Third</b><small>Name strap</small></button>
+          <button type="button" data-preset="news"><b>News Bar</b><small>Broadcast strap</small></button>
+          <button type="button" data-preset="intro"><b>Intro Reveal</b><small>Opening title</small></button>
+          <button type="button" data-preset="outro"><b>Outro Card</b><small>End screen</small></button>
+          <button type="button" data-preset="neon"><b>Neon</b><small>Glow title</small></button>
+          <button type="button" data-preset="minimal"><b>Minimal</b><small>Elegant title</small></button>
+          <button type="button" data-preset="stinger"><b>Stinger</b><small>Motion tag</small></button>
+        </div>
+        <div class="preset-actions"><button id="apply-graphic" type="button">Apply to preview</button><button id="remove-graphic" type="button">Remove</button></div>
+        <p class="preset-footnote">Select a clip first. Presets are saved in the project; export rendering is coming next.</p>
+      </section>
       <div class="storage-note"><i class="status-dot"></i> Files stay in this editing session</div>
     </aside>
 
@@ -49,6 +71,7 @@
           <button class="fullscreen-close" id="fullscreen-close" type="button" title="Close full screen preview" aria-label="Close full screen preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           <div class="preview-empty" id="preview-empty"><div class="play-emblem">▶</div><h3>Your story starts here.</h3><p>Import multiple videos to build a sequence.</p></div>
           <video id="video-preview" playsinline preload="metadata" hidden></video>
+          <div id="graphic-overlay" class="graphic-overlay" hidden></div>
           <div class="preview-overlay" id="preview-overlay" aria-label="Video playback control">
             <button class="overlay-control overlay-play" id="overlay-play-button" type="button" title="Play" aria-label="Play">
               <svg class="play-glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 10.5 37 24 17 37.5Z"/></svg>
