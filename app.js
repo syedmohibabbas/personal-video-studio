@@ -504,8 +504,32 @@
     }catch(error){result.innerHTML='<div class="analysis-empty"><span>!</span><p>'+esc(error.message||'Analysis failed.')+'</p></div>';toast('Could not analyze this clip.');}
     finally{button.disabled=false;button.innerHTML='<span>✦</span> Analyze Footage';}
   };
-  $('director-pacing').oninput=e=>{ $('director-pacing-mode').dataset.level=e.target.value; };
-  $('director-color').oninput=e=>{ $('director-color-mode').dataset.level=e.target.value; };
-  $('director-audio').oninput=e=>{ $('director-audio-mode').dataset.level=e.target.value; };
+  $('director-pacing').oninput=e=>{
+    const clip=selected();if(!clip)return;
+    clip.speed=0.5+(Number(e.target.value)/100)*1.5;
+    updateInspector();applyPreviewAdjustments();
+    $('clip-speed-value').textContent=clip.speed.toFixed(2)+'×';
+  };
+  $('director-pacing-mode').onchange=e=>toast('Pacing preference: '+e.target.value+'. Adjust the pacing slider to apply speed to the selected clip.');
+  $('director-color').oninput=e=>{
+    const clip=selected();if(!clip)return;
+    const amount=Number(e.target.value)/100;
+    clip.saturation=0.65+amount*0.9;clip.contrast=0.9+amount*0.25;
+    updateInspector();applyPreviewAdjustments();
+  };
+  $('director-color-mode').onchange=e=>{
+    const clip=selected();if(!clip){toast('Select a clip to apply a color mood.');return;}
+    const looks={Cinematic:{contrast:1.18,saturation:.88,brightness:-.03},Natural:{contrast:1,saturation:1,brightness:0},Warm:{contrast:1.06,saturation:1.12,brightness:.04},Cool:{contrast:1.08,saturation:.94,brightness:-.02}};
+    Object.assign(clip,looks[e.target.value]);updateInspector();applyPreviewAdjustments();toast(e.target.value+' color mood applied to preview.');
+  };
+  $('director-captions').onchange=e=>{
+    const overlay=$('graphic-overlay');overlay.style.visibility=e.target.checked?'visible':'hidden';
+    toast(e.target.checked?'Caption/graphic overlay visible.':'Caption/graphic overlay hidden.');
+  };
+  $('director-audio').oninput=e=>{
+    state.audioVolume=Number(e.target.value)/100;state.audio.volume=state.audioVolume;
+    $('audio-volume').value=e.target.value;$('audio-volume-value').textContent=e.target.value+'%';
+  };
+  $('director-audio-mode').onchange=e=>toast('Audio balance preference set to '+e.target.value+'.');
   checkHealth();render();
 })();
