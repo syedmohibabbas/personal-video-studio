@@ -1,4 +1,4 @@
-# Personal Video Studio — v0.5.0
+# Personal Video Studio — v0.6.0
 
 A local-first browser video editing workspace with multi-clip sequencing, a clip Inspector, and a FastAPI + FFmpeg sequence renderer.
 
@@ -6,6 +6,14 @@ A local-first browser video editing workspace with multi-clip sequencing, a clip
 - Desktop editing workspace inspired by professional nonlinear editors: Project panel on the left, Program Monitor in the center, Effect Controls on the right, and a full-width Timeline below.
 - Compact application menu and workspace strip, neutral charcoal panel styling, restrained blue selection accents, and denser controls.
 - Responsive tablet and mobile layouts. Existing editing controls and project/export workflows are retained.
+
+## v0.6 AI foundation
+- Docker image installs FFmpeg/FFprobe and Python dependencies for a consistent backend runtime.
+- Optional local speech recognition using faster-whisper (Whisper multilingual model); first transcription downloads the configured model on the backend host.
+- `POST /api/transcribe` generates timestamped SRT subtitles for an imported clip. Supports auto language detection and language hints including English, Urdu, Hindi, Arabic, Spanish, French, German, Portuguese, Turkish, Chinese and Japanese.
+- `GET /api/ai/status` reports whether the speech model package is installed and loaded.
+- Default model is `small` on CPU with INT8; configure `PVS_WHISPER_MODEL`, `PVS_WHISPER_DEVICE`, `PVS_WHISPER_COMPUTE_TYPE`, and `PVS_MODEL_CACHE` for a suitably provisioned host.
+- AI captions are downloaded as SRT files. They are not yet burned into sequence exports or synchronized as editable timeline caption clips.
 
 ## v0.5 features
 - Clip Inspector: trim in/out, scale, rotation, X/Y position, opacity, playback speed, fade in/out, clip volume, brightness, contrast, and saturation.
@@ -18,6 +26,9 @@ A local-first browser video editing workspace with multi-clip sequencing, a clip
 - Full sequence export applies supported Inspector settings, soundtrack mix, selected aspect ratio, resolution, format, and quality.
 
 ## Important behavior and limitations
+- GitHub Pages does not run FFmpeg or AI models. Build and host the Docker backend separately, then use **Connect engine** in the editor.
+- The first AI transcription downloads a model from the model registry. Keep the model cache volume persistent where possible. Hosting and compute may incur charges; do not deploy a paid instance without reviewing its pricing.
+- This AI integration currently provides speech transcription/subtitle files only. Automatic highlight selection, semantic scene understanding, generative motion graphics, and AI editing decisions are not implemented.
 - Resolution choices specify output dimensions; upscaling a low-resolution source does not create genuine extra detail.
 - GIF exports are silent and may be very large; audio is omitted by design.
 - WebM, AVI, MOV, MKV, and GIF availability depends on the installed FFmpeg encoders. Only detected formats are selectable.
@@ -27,11 +38,13 @@ A local-first browser video editing workspace with multi-clip sequencing, a clip
 - Do not expose a personal backend publicly without authentication, upload limits appropriate to the deployment, and resource controls.
 
 ## Requirements
-Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser.
+Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser. For the Docker backend, build with `docker build -t personal-video-studio .` and run with `docker run -p 10000:10000 -e PORT=10000 -v pvs-model-cache:/var/cache/pvs-whisper personal-video-studio`. The first transcription downloads the Whisper model; allow outbound network access and sufficient disk/RAM. CPU inference is slower than a supported GPU.
 
 ## API
 - `GET /api/health`
 - `GET /api/capabilities` — available output encoders/formats
+- `GET /api/ai/status` — local Whisper runtime status
+- `POST /api/transcribe` — generate timestamped SRT captions using local Whisper
 - `POST /api/analyze` — basic FFprobe metadata
 - `POST /api/export` — legacy single-clip MP4 export
 - `POST /api/export-sequence` — sequence render with per-clip adjustments and optional background audio
