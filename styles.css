@@ -855,3 +855,28 @@ body.light-theme .project-chip,body.light-theme .director-controls label,body.li
 .project-menu-popup button{display:block;width:100%;padding:9px 10px;border:0;border-radius:5px;background:transparent;color:#e5e8f2;text-align:left;font-size:11px}
 .project-menu-popup button:hover{background:#39305b}
 .audio-waveform[hidden]{display:none!important}
+
+/* Social canvas presets and violet transport controls */
+.aspect-select-wrap{display:flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid #34314e;border-radius:8px;background:#171827;color:#8f89a9}
+.aspect-select-wrap span{font-size:8px;font-weight:800;letter-spacing:.9px}
+.aspect-select-wrap select{max-width:205px;border:0;outline:0;background:transparent;color:#e8e4ff;font:600 10px var(--font);padding:5px 18px 5px 3px;cursor:pointer}
+.aspect-select-wrap option{background:#1c1b2c;color:#eee}
+.preview-stage.aspect-portrait{width:auto;max-width:100%;height:min(58vh,520px);min-height:0;aspect-ratio:var(--preview-ratio,.5625);flex:0 1 auto;align-self:center}
+.preview-stage.aspect-landscape{aspect-ratio:var(--preview-ratio,1.7778)}
+.transport-left{gap:9px}
+.transport-left .play-button{width:44px;height:44px;border:1px solid #a68aff;border-radius:50%;background:linear-gradient(145deg,#a15cff,#6535ed 72%);color:white;display:grid;place-items:center;box-shadow:0 4px 16px #7138ed55;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.transport-left .play-button:hover{filter:brightness(1.14);transform:scale(1.07);box-shadow:0 5px 22px #854cff88}
+.transport-left .play-button:active{transform:scale(.94)}
+.transport-play-icon,.transport-pause-icon{width:23px;height:23px;fill:white}
+.transport-pause-icon{display:none}
+.transport-left .play-button.is-playing .transport-play-icon{display:none}
+.transport-left .play-button.is-playing .transport-pause-icon{display:block}
+.transport-left .seek-transport{width:42px;height:42px;border:0;border-radius:50%;background:#29213f;color:#bfa9ff;transition:transform .16s ease,background .16s ease,color .16s ease}
+.transport-left .seek-transport svg{width:27px;height:27px;fill:currentColor;stroke:none}
+.transport-left .seek-transport:hover{background:#46306f;color:#fff;transform:scale(1.08)}
+.transport-left .seek-transport:active{transform:scale(.93)}
+.transport-left .clip-step-button{width:23px;font-size:10px;color:#777f95}
+.transport-left button{cursor:pointer}
+button{transition:filter .14s ease,border-color .14s ease,background-color .14s ease,transform .14s ease}
+button:active:not(:disabled){transform:scale(.96)}
+@media(max-width:760px){.aspect-select-wrap select{max-width:140px}.transport-left .clip-step-button{display:none}}
