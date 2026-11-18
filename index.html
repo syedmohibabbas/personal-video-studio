@@ -154,6 +154,15 @@
             <div class="inspector-control"><label for="clip-contrast">Contrast <output id="clip-contrast-value">1.00</output></label><input id="clip-contrast" data-edit="contrast" type="range" min="0.5" max="2" value="1" step="0.01"></div>
             <div class="inspector-control"><label for="clip-saturation">Saturation <output id="clip-saturation-value">1.00</output></label><input id="clip-saturation" data-edit="saturation" type="range" min="0" max="2" value="1" step="0.01"></div>
           </div>
+          <div class="inspector-section ai-tools-section">
+            <div class="inspector-section-title">AI SPEECH & CAPTIONS</div>
+            <label class="ai-language-label" for="ai-language">Spoken language</label>
+            <select id="ai-language" class="ai-language-select">
+              <option value="auto">Auto detect</option><option value="en">English</option><option value="ur">Urdu</option><option value="hi">Hindi</option><option value="ar">Arabic</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option><option value="pt">Portuguese</option><option value="tr">Turkish</option><option value="zh">Chinese</option><option value="ja">Japanese</option>
+            </select>
+            <button class="button button-secondary full-width ai-transcribe-button" id="ai-transcribe" type="button">Generate AI captions (.SRT)</button>
+            <p class="field-help" id="ai-status-note">Connect the AI backend to generate timed subtitles. Whisper runs on your backend server.</p>
+          </div>
           <div class="inspector-actions"><button class="button button-quiet" id="reset-inspector" type="button">Reset clip adjustments</button></div>
           <p class="field-help">Adjustments are previewed on the selected clip and applied when you export the sequence.</p>
         </div>
