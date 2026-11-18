@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: personal-video-studio-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PVS_API_KEY
+        generateValue: true
+      - key: PVS_WHISPER_MODEL
+        value: tiny
+      - key: PVS_WHISPER_DEVICE
+        value: cpu
+      - key: PVS_WHISPER_COMPUTE_TYPE
+        value: int8
+      - key: PVS_MODEL_CACHE
+        value: /tmp/pvs-whisper-cache
