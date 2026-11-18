@@ -25,6 +25,13 @@
 <div class="app-menu-popup" id="app-menu-popup" hidden role="menu"></div>
 
   <main class="workspace">
+    <aside class="tool-rail" aria-label="Main navigation">
+      <button class="rail-tool active" type="button" data-rail="studio" title="Studio"><span>▦</span><small>Studio</small></button>
+      <button class="rail-tool" type="button" data-rail="projects" title="Projects"><span>▱</span><small>Projects</small></button>
+      <button class="rail-tool" type="button" data-rail="media" title="Media Library"><span>▶</span><small>Media<br>Library</small></button>
+      <button class="rail-tool" type="button" data-rail="templates" title="Templates"><span>▦</span><small>Templates</small></button>
+      <button class="rail-tool" type="button" data-rail="settings" title="Settings"><span>⚙</span><small>Settings</small></button>
+    </aside>
     <aside class="panel media-panel">
       <div class="panel-heading"><div class="panel-title-wrap"><span class="eyebrow">PROJECT</span><h2>Project</h2></div><button class="panel-menu" type="button" aria-label="Project panel options">☰</button></div>
       <button class="import-drop" id="video-drop">
@@ -170,12 +177,16 @@
       </section>
 
       <section class="panel director-panel">
-        <div class="director-top"><div><span class="eyebrow">CREATIVE ASSISTANT</span><h2>AI Director</h2></div><span class="coming-soon">ROADMAP</span></div>
-        <div class="director-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="director-core">✳</div><span class="spark spark-one">✦</span><span class="spark spark-two">✧</span></div>
-        <h3>Your creative partner.</h3>
-        <p>AI scene understanding and automatic creative edit decisions are planned for a later release.</p>
-        <div class="director-capabilities"><span>Scene understanding</span><span>Creative cut decisions</span><span>Motion graphics</span><span>Color & sound</span></div>
-        <div class="notice"><span>i</span><p>AI editing is not active yet. v0.2 provides a multi-clip editing foundation, not AI-generated edits.</p></div>
+        <div class="director-top"><div><span class="eyebrow">CREATIVE ASSISTANT</span><h2>✦ AI Director</h2></div><button class="director-collapse" type="button" aria-label="Collapse AI Director">⌃</button></div>
+        <button class="analyze-footage-button" id="analyze-footage" type="button"><span>✦</span> Analyze Footage</button>
+        <div class="analysis-result" id="analysis-result" aria-live="polite"><div class="analysis-empty"><span>✧</span><p>Select a clip and analyze its technical properties.</p></div></div>
+        <div class="director-controls">
+          <label><span>◷ &nbsp; Pacing</span><input id="director-pacing" type="range" min="0" max="100" value="55"><select id="director-pacing-mode"><option>Balanced</option><option>Fast</option><option>Slow</option></select></label>
+          <label><span>◉ &nbsp; Color Mood</span><input id="director-color" type="range" min="0" max="100" value="55"><select id="director-color-mode"><option>Cinematic</option><option>Natural</option><option>Warm</option><option>Cool</option></select></label>
+          <label><span>CC &nbsp; Captions</span><input id="director-captions" type="checkbox" checked></label>
+          <label><span>◖ &nbsp; Audio Balance</span><input id="director-audio" type="range" min="0" max="100" value="50"><select id="director-audio-mode"><option>Auto</option><option>Voice focus</option><option>Music focus</option></select></label>
+        </div>
+        <p class="director-footnote">Footage analysis reads clip metadata. Creative scene detection and automatic edit decisions are not yet enabled.</p>
       </section>
     </aside>
   </main>
