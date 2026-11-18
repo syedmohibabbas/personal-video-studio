@@ -19,9 +19,10 @@
     </div>
   </header>
   <nav class="app-menubar" aria-label="Application menu">
-    <div class="menu-items"><span>File</span><span>Edit</span><span>Clip</span><span>Sequence</span><span>Markers</span><span>Graphics</span><span>View</span><span>Window</span><span>Help</span></div>
-    <div class="workspace-switcher"><span class="workspace-label">WORKSPACE</span><span class="workspace-active">Editing</span><span>Color</span><span>Audio</span></div>
+    <div class="menu-items" role="menubar"><button type="button" data-app-menu="File">File</button><button type="button" data-app-menu="Edit">Edit</button><button type="button" data-app-menu="Clip">Clip</button><button type="button" data-app-menu="Sequence">Sequence</button><button type="button" data-app-menu="Markers">Markers</button><button type="button" data-app-menu="Graphics">Graphics</button><button type="button" data-app-menu="View">View</button><button type="button" data-app-menu="Window">Window</button><button type="button" data-app-menu="Help">Help</button></div>
+    <div class="workspace-switcher"><span class="workspace-label">WORKSPACE</span><button type="button" data-workspace="editing" class="workspace-active">Editing</button><button type="button" data-workspace="color">Color</button><button type="button" data-workspace="audio">Audio</button></div>
   </nav>
+<div class="app-menu-popup" id="app-menu-popup" hidden role="menu"></div>
 
   <main class="workspace">
     <aside class="panel media-panel">
@@ -178,7 +179,7 @@
       </section>
     </aside>
   </main>
-  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.5.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><button class="engine-connect" id="backend-connect" type="button">Connect engine</button><span>LOCAL-FIRST WORKSPACE</span></footer>
+  <footer class="bottom-bar"><span>PERSONAL VIDEO STUDIO <b>·</b> BUILD 0.6.0</span><span id="backend-status"><i class="status-dot offline"></i> CHECKING ENGINE...</span><button class="engine-connect" id="backend-connect" type="button">Connect engine</button><span>LOCAL-FIRST WORKSPACE</span></footer>
 </div>
 
 <div class="export-backdrop" id="export-dialog" hidden>
