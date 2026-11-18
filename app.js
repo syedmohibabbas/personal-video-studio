@@ -469,8 +469,8 @@
       event.preventDefault(); video.currentTime = Math.max(c.start, Math.min(c.end, video.currentTime + (event.key === 'ArrowLeft' ? -5 : 5)));
     }
   });
-  checkHealth();render();
-})();
+
+
   // Main navigation rail: every item routes to an existing, meaningful action.
   document.querySelectorAll('[data-rail]').forEach(button=>button.addEventListener('click',()=>{
     document.querySelectorAll('[data-rail]').forEach(b=>b.classList.toggle('active',b===button));
@@ -507,3 +507,5 @@
   $('director-pacing').oninput=e=>{ $('director-pacing-mode').dataset.level=e.target.value; };
   $('director-color').oninput=e=>{ $('director-color-mode').dataset.level=e.target.value; };
   $('director-audio').oninput=e=>{ $('director-audio-mode').dataset.level=e.target.value; };
+  checkHealth();render();
+})();
