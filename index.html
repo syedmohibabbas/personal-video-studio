@@ -11,7 +11,7 @@
   <header class="topbar">
     <a class="brand" href="#" aria-label="Personal Video Studio home"><span class="brand-mark">▶</span><span>Personal <b>Video Studio</b></span></a>
     <span class="topbar-divider"></span>
-    <button class="project-chip" id="rename-project" type="button"><span class="project-clapper">▣</span><span id="project-name">Untitled Project</span><span class="chevron">⌄</span></button>
+    <div class="project-control"><button class="project-chip" id="rename-project" type="button"><span class="project-clapper">▣</span><span id="project-name">Untitled Project</span></button><button class="project-menu-button" id="project-menu" type="button" aria-label="Project actions">⌄</button><div class="project-menu-popup" id="project-menu-popup" hidden><button id="project-new-action" type="button">New project</button><button id="project-open-action" type="button">Open project…</button><button id="project-save-action" type="button">Save project</button></div></div>
     <span class="save-indicator"><i class="status-dot"></i><span id="save-status">All changes saved</span></span>
     <div class="top-actions">
       <button class="top-icon" id="undo-button" type="button" disabled title="Undo history is not available yet" aria-label="Undo">↶</button>
