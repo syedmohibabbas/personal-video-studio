@@ -58,6 +58,7 @@
     $('timeline-status').textContent=count?`${count} clip${count===1?'':'s'} in sequence`:'No clips loaded';
     $('audio-track-name').textContent=state.audioFile?`♫ ${state.audioFile.name}`:'No audio imported';
     $('audio-track-name').classList.toggle('has-audio',!!state.audioFile);
+    $('audio-import').textContent=state.audioFile?'− Remove background audio':'＋ Add background audio';
     $('export-button').disabled=!count || state.exporting;
     updateInspector();
   }
@@ -265,7 +266,14 @@
   $('video-drop').ondragover=e=>{e.preventDefault();$('video-drop').classList.add('dragging');};
   $('video-drop').ondragleave=()=>$('video-drop').classList.remove('dragging');
   $('video-drop').ondrop=async e=>{e.preventDefault();$('video-drop').classList.remove('dragging');for(const f of Array.from(e.dataTransfer.files||[]))await addVideo(f);};
-  $('audio-import').onclick=()=>$('audio-input').click();
+  $('audio-import').onclick=()=>{
+    if(state.audioFile){
+      if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);
+      state.audio.pause();state.audio.removeAttribute('src');state.audio.load();
+      state.audioFile=null;state.audioUrl=null;render();toast('Background audio removed.');return;
+    }
+    $('audio-input').click();
+  };
   $('audio-volume').oninput=e=>{state.audioVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));state.audio.volume=state.audioVolume;$('audio-volume-value').textContent=`${e.target.value}%`;};
   $('audio-input').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audioFile=f;state.audioUrl=URL.createObjectURL(f);state.audio.src=state.audioUrl;state.audio.loop=true;state.audio.volume=state.audioVolume;render();toast('Background audio added for preview.');};
   $('media-list').onclick=e=>{const b=e.target.closest('[data-select],[data-up],[data-down]');if(!b)return;if(b.dataset.select)selectClip(b.dataset.select);if(b.dataset.up)moveClip(b.dataset.up,-1);if(b.dataset.down)moveClip(b.dataset.down,1);};
@@ -361,7 +369,7 @@
   $('backend-connect').onclick = connectBackend;
   $('export-connect-engine').onclick = () => $('backend-connect').click();
   $('load-project').onclick=()=>$('project-input').click();$('project-input').onchange=e=>{const f=e.target.files?.[0];if(f)loadProject(f);e.target.value='';};
-  $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;state.projectName='Untitled Project';state.previewAspect='landscape';setPreviewAspect('landscape');if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;state.audioVolume=.35;$('audio-volume').value=35;$('audio-volume-value').textContent='35%';video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('project-name').textContent=state.projectName;$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
+  $('new-project').onclick=()=>{if(!confirm('Start a new project and clear all imported media?'))return;state.clips.forEach(c=>URL.revokeObjectURL(c.url));state.clips=[];state.selectedId=null;state.projectName='Untitled Project';state.previewAspect='landscape';setPreviewAspect('landscape');if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audio.pause();state.audioFile=null;state.audioUrl=null;state.audioVolume=.35;$('audio-import').textContent='＋ Add background audio';$('audio-volume').value=35;$('audio-volume-value').textContent='35%';video.pause();video.removeAttribute('src');video.load();video.hidden=true;$('preview-stage').classList.remove('has-video');$('preview-empty').hidden=false;$('project-name').textContent=state.projectName;$('current-time').textContent='00:00.00';$('total-time').textContent='00:00.00';render();};
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
   function syncPlaybackButtons(){
     const icon=video.paused?'▶':'Ⅱ',label=video.paused?'Play':'Pause';
@@ -398,10 +406,56 @@
     hidePreviewControls();
     event.currentTarget.blur();
   };
-  video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=fmt(Math.max(0,video.currentTime-c.start));if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
+  video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=fmt(Math.max(0,video.currentTime-c.start));if(state.audioFile&&!state.audio.paused){const target=Math.max(0,video.currentTime-c.start);if(Math.abs(state.audio.currentTime-target)>0.45)state.audio.currentTime=target;}if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
   function stepClip(delta){const i=state.clips.findIndex(c=>c.id===state.selectedId),c=state.clips[i+delta];if(c)selectClip(c.id);}
   $('previous-clip').onclick=()=>stepClip(-1);$('next-clip').onclick=()=>stepClip(1);
-  $('fit-timeline').onclick=()=>toast('Timeline fitted to the current sequence.');
+  $('fit-timeline').onclick=()=>{
+    const active=timelineClips.querySelector('.sequence-clip.active');
+    if(active){active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});toast('Selected clip brought into view.');}
+    else{timelineClips.scrollTo({left:0,behavior:'smooth'});toast('Timeline moved to the start.');}
+  };
+
+  // Application menus: every menu item maps to an existing editor action.
+  const menuPopup=$('app-menu-popup');
+  const menuActions={
+    File:[['New project',()=>$('new-project').click()],['Open project…',()=>$('load-project').click()],['Save project',saveProject],['Export sequence…',openExportDialog]],
+    Edit:[['Undo / Redo','not-available'],['Reset selected clip',()=>$('reset-inspector').click()],['Rename project',()=>$('rename-project').click()]],
+    Clip:[['Apply trim points',()=>$('apply-trim').click()],['Move clip up',()=>$('move-left').click()],['Move clip down',()=>$('move-right').click()],['Remove selected clip',()=>$('remove-clip').click()]],
+    Sequence:[['Export sequence…',openExportDialog],['Landscape 16:9',()=>setPreviewAspect('landscape')],['Portrait 9:16',()=>setPreviewAspect('portrait')]],
+    Markers:[['Markers are not available yet','not-available']],
+    Graphics:[['Apply selected graphic',()=>$('apply-graphic').click()],['Remove graphic',()=>$('remove-graphic').click()]],
+    View:[['Full screen preview',openFullscreenPreview],['Show selected clip in timeline',()=>$('fit-timeline').click()]],
+    Window:[['Project panel',()=>document.querySelector('.media-panel').scrollIntoView({behavior:'smooth'})],['Effect Controls',()=>document.querySelector('.inspector-panel').scrollIntoView({behavior:'smooth'})]],
+    Help:[['Keyboard shortcuts: Space play/pause · ←/→ seek 5 sec · Ctrl/Cmd+S save', 'not-available']]
+  };
+  document.querySelectorAll('[data-app-menu]').forEach(button=>button.addEventListener('click',()=>{
+    const name=button.dataset.appMenu;
+    if(!menuPopup.hidden&&menuPopup.dataset.open===name){menuPopup.hidden=true;return;}
+    menuPopup.innerHTML=(menuActions[name]||[]).map((item,i)=>'<button type="button" role="menuitem" data-menu-action="'+i+'">'+item[0]+'</button>').join('');
+    menuPopup.dataset.open=name;menuPopup.hidden=false;
+    const rect=button.getBoundingClientRect();menuPopup.style.left=rect.left+'px';menuPopup.style.top=(rect.bottom+5)+'px';
+    menuPopup.querySelectorAll('[data-menu-action]').forEach(item=>item.onclick=()=>{
+      const action=menuActions[name][Number(item.dataset.menuAction)][1];menuPopup.hidden=true;
+      if(typeof action==='function')action();else toast(name==='Edit'?'Undo/redo history is not implemented yet.':name==='Markers'?'Timeline markers are planned for a later update.':'This action is not available yet.');
+    });
+  }));
+  document.addEventListener('click',event=>{if(!event.target.closest('.app-menubar')&&!event.target.closest('.app-menu-popup'))menuPopup.hidden=true;});
+
+  // Workspace buttons navigate to the real controls instead of acting as decoration.
+  document.querySelectorAll('[data-workspace]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('[data-workspace]').forEach(b=>b.classList.toggle('workspace-active',b===button));
+    const target=button.dataset.workspace;
+    const destination=target==='color'?$('[id="clip-brightness"]').closest('.inspector-section'):target==='audio'?$('[id="clip-volume"]').closest('.inspector-section'):document.querySelector('.timeline-panel');
+    if(destination){destination.scrollIntoView({behavior:'smooth',block:'center'});if(target!=='editing'&&!selected())toast('Select a clip to use '+target+' controls.');}
+  }));
+
+  // Panel options collapse/expand their corresponding workspace panel.
+  document.querySelectorAll('.panel-menu').forEach(button=>button.addEventListener('click',()=>{
+    const panel=button.closest('.panel');if(!panel)return;
+    panel.classList.toggle('panel-collapsed');
+    button.setAttribute('aria-expanded',String(!panel.classList.contains('panel-collapsed')));
+    toast(panel.classList.contains('panel-collapsed')?'Panel collapsed.':'Panel expanded.');
+  }));
 
   // Keyboard shortcuts: Space toggles playback, arrows seek, Ctrl/Cmd+S saves.
   document.addEventListener('keydown', event => {
