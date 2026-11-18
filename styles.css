@@ -482,3 +482,42 @@ button,input,select{font-family:Arial,Helvetica,sans-serif}
   .bottom-bar{padding:0 8px;gap:8px}
   .bottom-bar span:last-child{display:none}
 }
+
+/* Graphics & Presets panel */
+.graphics-presets{margin-top:16px;padding-top:12px;border-top:1px solid #414141}
+.presets-heading h3{font:600 13px Arial,Helvetica,sans-serif;margin:4px 0 11px;color:#e4e4e4}
+.preset-text-label,.preset-category-label{display:block;font-size:8px;letter-spacing:.8px;color:#aaa;margin:9px 0 5px}
+.preset-text-input{width:100%;height:29px;background:#303030;border:1px solid #505050;border-radius:2px;padding:0 8px;color:#eee;font:10px Arial,sans-serif}
+.preset-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.preset-grid button{min-width:0;text-align:left;padding:7px 6px;background:#303030;border:1px solid #484848;border-radius:2px;color:#ddd;cursor:pointer}
+.preset-grid button:hover,.preset-grid button.active{background:#3a4653;border-color:#8ab4f8}
+.preset-grid b,.preset-grid small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-grid b{font-size:9px;font-weight:600}
+.preset-grid small{font-size:8px;color:#999;margin-top:3px}
+.preset-actions{display:flex;gap:5px;margin-top:7px}
+.preset-actions button{flex:1;padding:7px 5px;border:1px solid #555;border-radius:2px;background:#3b3b3b;color:#eee;font-size:9px;cursor:pointer}
+.preset-actions button:first-child{background:#405a76;border-color:#6685a8}
+.preset-footnote{font-size:8px;line-height:1.45;color:#929292;margin:7px 0 0}
+.graphic-overlay{position:absolute;z-index:4;left:5%;right:5%;pointer-events:none;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;font-family:Arial,Helvetica,sans-serif;font-weight:800;line-height:1.08;text-transform:uppercase}
+.graphic-overlay[hidden]{display:none}
+.graphic-overlay.position-bottom{bottom:9%;font-size:clamp(15px,3vw,34px)}
+.graphic-overlay.position-center{top:50%;transform:translateY(-50%);font-size:clamp(24px,5vw,58px)}
+.graphic-overlay.position-lower{bottom:13%;text-align:left;font-size:clamp(15px,2.8vw,30px)}
+.graphic-overlay.position-upper{top:12%;font-size:clamp(18px,3.5vw,38px)}
+.graphic-overlay.caption-pop{color:#fff;text-shadow:2px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111,1px 1px 0 #111;animation:graphic-pop .35s both}
+.graphic-overlay.caption-box{display:table;left:50%;right:auto;max-width:90%;bottom:9%;transform:translateX(-50%);padding:8px 13px;background:#080808d9;color:#fff;border-radius:3px;font-size:clamp(14px,2.5vw,27px)}
+.graphic-overlay.karaoke{color:#ffe45c;text-shadow:2px 2px #111,-1px -1px #111;animation:graphic-pop .4s both}
+.graphic-overlay.title-bold{color:#fff;text-shadow:0 3px 12px #000;letter-spacing:.04em;animation:graphic-rise .6s both}
+.graphic-overlay.title-cinematic{color:#f4e9cf;font-family:Georgia,serif;font-weight:400;letter-spacing:.2em;text-shadow:0 2px 12px #000;animation:graphic-fade 1s both}
+.graphic-overlay.lower-third{left:6%;right:auto;max-width:80%;padding:9px 14px;border-left:4px solid #8ab4f8;background:linear-gradient(90deg,#101820ef,#10182055);color:#fff;text-align:left;animation:graphic-slide .55s both}
+.graphic-overlay.news{left:0;right:0;bottom:8%;padding:11px 5%;background:#b52d32;color:#fff;text-align:left;font-size:clamp(14px,2.5vw,25px);animation:graphic-slide .45s both}
+.graphic-overlay.intro{color:#fff;letter-spacing:.14em;text-shadow:0 4px 18px #000;animation:graphic-rise .8s both}
+.graphic-overlay.outro{color:#fff;letter-spacing:.1em;text-shadow:0 2px 15px #000;animation:graphic-fade 1.2s both}
+.graphic-overlay.neon{color:#fff;text-shadow:0 0 5px #fff,0 0 12px #55c8ff,0 0 26px #278bff;animation:graphic-fade .8s both}
+.graphic-overlay.minimal{color:#fff;font-weight:500;letter-spacing:.12em;text-shadow:0 2px 8px #000;animation:graphic-fade .8s both}
+.graphic-overlay.stinger{color:#fff;background:#8ab4f8;padding:9px 14px;width:max-content;max-width:90%;left:50%;right:auto;transform:translateX(-50%);animation:graphic-slide .35s both}
+@keyframes graphic-pop{from{opacity:0;scale:.75}to{opacity:1;scale:1}}
+@keyframes graphic-rise{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}
+@keyframes graphic-fade{from{opacity:0}to{opacity:1}}
+@keyframes graphic-slide{from{opacity:0;translate:-35px 0}to{opacity:1;translate:0 0}}
+@media(max-width:760px){.preset-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.graphic-overlay.position-center{font-size:clamp(20px,7vw,42px)}}
