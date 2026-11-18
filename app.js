@@ -62,8 +62,8 @@
     $('audio-track-name').classList.toggle('has-audio',!!state.audioFile);
     $('audio-waveform').hidden=!state.audioFile;
     const captionTrack=$('captions-track');
-    const caption=state.clips.find(x=>x.graphic&&x.graphic.text)?.graphic?.text;
-    captionTrack.innerHTML=caption?'<div class="caption-block">'+esc(caption)+'</div>':'<div class="caption-block caption-empty">Captions appear here</div>';
+    const captionClips=state.clips.filter(x=>x.graphic&&x.graphic.text);
+    captionTrack.innerHTML=captionClips.length?captionClips.map(x=>'<div class="caption-block" style="flex:'+Math.max(.2,x.end-x.start)+'">'+esc(x.graphic.text)+'</div>').join(''):'<div class="caption-block caption-empty">Captions appear here</div>';
     const playhead=$('timeline-playhead');if(playhead)playhead.style.left=Math.max(0,Math.min(100,totalDuration()?((video.currentTime/(totalDuration()||1))*100):0))+'%';
     $('audio-import').textContent=state.audioFile?'− Remove background audio':'＋ Add background audio';
     $('export-button').disabled=!count || state.exporting;
@@ -282,7 +282,20 @@
     $('audio-input').click();
   };
   $('audio-volume').oninput=e=>{state.audioVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));state.audio.volume=state.audioVolume;$('audio-volume-value').textContent=`${e.target.value}%`;};
-  $('audio-input').onchange=e=>{const f=e.target.files?.[0];if(!f)return;if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);state.audioFile=f;state.audioUrl=URL.createObjectURL(f);state.audio.src=state.audioUrl;state.audio.loop=true;state.audio.volume=state.audioVolume;render();toast('Background audio added for preview.');};
+  $('audio-input').onchange=async e=>{
+    const f=e.target.files?.[0];if(!f)return;
+    if(state.audioUrl)URL.revokeObjectURL(state.audioUrl);
+    state.audioFile=f;state.audioUrl=URL.createObjectURL(f);state.audio.src=state.audioUrl;state.audio.loop=true;state.audio.volume=state.audioVolume;
+    render();toast('Background audio added for preview.');
+    try{
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return;
+      const ctx=new AudioCtx(),buffer=await ctx.decodeAudioData(await f.arrayBuffer()),data=buffer.getChannelData(0),count=180,step=Math.max(1,Math.floor(data.length/count)),peaks=[];
+      for(let i=0;i<count;i++){let peak=0;for(let j=0;j<step&&i*step+j<data.length;j++)peak=Math.max(peak,Math.abs(data[i*step+j]));peaks.push(Math.max(3,Math.round(peak*100)));}
+      $('audio-waveform').innerHTML=peaks.map(v=>'<i style="height:'+v+'%"></i>').join('');
+      await ctx.close();
+    }catch{$('audio-waveform').innerHTML='';}
+  };
   $('media-list').onclick=e=>{const b=e.target.closest('[data-select],[data-up],[data-down]');if(!b)return;if(b.dataset.select)selectClip(b.dataset.select);if(b.dataset.up)moveClip(b.dataset.up,-1);if(b.dataset.down)moveClip(b.dataset.down,1);};
   $('timeline-clips').onclick=e=>{const b=e.target.closest('[data-sequence]');if(b)selectClip(b.dataset.sequence);};
 
@@ -488,7 +501,7 @@
     const route=button.dataset.rail;
     if(route==='projects'){$('load-project').click();return;}
     if(route==='media'){$('video-input').click();return;}
-    if(route==='templates'){document.querySelector('.graphics-presets').scrollIntoView({behavior:'smooth',block:'center'});return;}
+    if(route==='templates'){const presets=document.querySelector('.graphics-presets');presets.style.display=presets.style.display==='block'?'none':'block';if(presets.style.display==='block')presets.scrollIntoView({behavior:'smooth',block:'center'});toast(presets.style.display==='block'?'Graphics presets opened.':'Graphics presets hidden.');return;}
     if(route==='settings'){$('backend-connect').click();return;}
     document.querySelector('.preview-panel').scrollIntoView({behavior:'smooth',block:'center'});
   }));
