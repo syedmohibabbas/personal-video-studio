@@ -6,6 +6,7 @@
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
   const short = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+  const timecode = s => {const v=Math.max(0,Number(s)||0),m=Math.floor(v/60),sec=Math.floor(v%60),frames=Math.floor((v%1)*30);return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(sec).padStart(2,'0')}:${String(frames).padStart(2,'0')}`;};
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const selected = () => state.clips.find(c => c.id === state.selectedId) || null;
   function revealPreviewControls() {
@@ -93,7 +94,7 @@
     const c=state.clips.find(x=>x.id===id); if(!c)return;
     state.selectedId=id; video.pause(); state.audio.pause(); video.src=c.url; video.hidden=false; $('preview-empty').hidden=true; $('preview-stage').classList.add('has-video'); $('preview-stage').classList.remove('is-playing'); hidePreviewControls();
     $('preview-hint').textContent=`CLIP ${state.clips.indexOf(c)+1} OF ${state.clips.length}`;
-    video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=fmt(c.end-c.start);};
+    video.onloadedmetadata=()=>{video.currentTime=Math.min(c.start,Math.max(0,c.duration-.05));$('total-time').textContent=timecode(c.end-c.start);};
     render();
     applyPreviewAdjustments();
   }
@@ -115,7 +116,7 @@
     const i=state.clips.findIndex(c=>c.id===id); if(i<0)return;
     const [c]=state.clips.splice(i,1); URL.revokeObjectURL(c.url);
     if(state.selectedId===id){state.selectedId=state.clips[Math.min(i,state.clips.length-1)]?.id||null;
-      if(state.selectedId)selectClip(state.selectedId);else{video.pause();video.removeAttribute('src');video.load();video.hidden=true;video.style.transform='';video.style.filter='';video.style.opacity='1';video.playbackRate=1;video.volume=1;$('preview-stage').classList.remove('has-video','is-playing','controls-visible');$('preview-empty').hidden=false;$('total-time').textContent='00:00.00';$('current-time').textContent='00:00.00';}}
+      if(state.selectedId)selectClip(state.selectedId);else{video.pause();video.removeAttribute('src');video.load();video.hidden=true;video.style.transform='';video.style.filter='';video.style.opacity='1';video.playbackRate=1;video.volume=1;$('preview-stage').classList.remove('has-video','is-playing','controls-visible');$('preview-empty').hidden=false;$('total-time').textContent='00:00:00:00';$('current-time').textContent='00:00:00:00';}}
     render();
   }
   function moveClip(id,delta) {
@@ -289,6 +290,7 @@
   timelineClips.addEventListener('dragstart', event => {
     const item = event.target.closest('[data-sequence]');
     if (!item) return;
+    if(item.closest('.track-row')?.classList.contains('track-locked')){event.preventDefault();toast('Video track is locked. Unlock it to reorder clips.');return;}
     state.draggingId = item.dataset.sequence;
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', state.draggingId);
@@ -300,6 +302,7 @@
   timelineClips.addEventListener('drop', event => {
     event.preventDefault();
     const target = event.target.closest('[data-sequence]');
+    if(target?.closest('.track-row')?.classList.contains('track-locked')){toast('Video track is locked.');state.draggingId=null;return;}
     const from = state.clips.findIndex(c => c.id === state.draggingId);
     const to = target ? state.clips.findIndex(c => c.id === target.dataset.sequence) : -1;
     if (from >= 0 && to >= 0 && from !== to) {
@@ -412,7 +415,9 @@
     hidePreviewControls();
     event.currentTarget.blur();
   };
-  video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=fmt(Math.max(0,video.currentTime-c.start));if(state.audioFile&&!state.audio.paused){const target=Math.max(0,video.currentTime-c.start);if(Math.abs(state.audio.currentTime-target)>0.45)state.audio.currentTime=target;}if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
+  video.ontimeupdate=()=>{const c=selected();if(!c)return;$('current-time').textContent=timecode(Math.max(0,video.currentTime-c.start));
+    const sequenceOffset=state.clips.slice(0,state.clips.findIndex(x=>x.id===c.id)).reduce((sum,x)=>sum+Math.max(0,x.end-x.start),0);
+    $('timeline-playhead').style.left=Math.max(0,Math.min(100,((sequenceOffset+video.currentTime-c.start)/(totalDuration()||1))*100))+'%';if(state.audioFile&&!state.audio.paused){const target=Math.max(0,video.currentTime-c.start);if(Math.abs(state.audio.currentTime-target)>0.45)state.audio.currentTime=target;}if(video.currentTime>=c.end){video.pause();state.audio.pause();video.currentTime=c.end;}};
   function stepClip(delta){const i=state.clips.findIndex(c=>c.id===state.selectedId),c=state.clips[i+delta];if(c)selectClip(c.id);}
   $('previous-clip').onclick=()=>stepClip(-1);$('next-clip').onclick=()=>stepClip(1);
   $('fit-timeline').onclick=()=>{
