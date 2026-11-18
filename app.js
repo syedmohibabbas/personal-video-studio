@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null, activePreset: null };
+  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', apiKey: localStorage.getItem('pvs_api_key') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null, activePreset: null };
   const video = $('video-preview');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
@@ -204,7 +204,7 @@
       form.append('quality', $('export-quality').value);
       form.append('audio_volume', String(state.audioVolume));
       if (state.audioFile) form.append('audio', state.audioFile, state.audioFile.name);
-      const response = await fetch(apiUrl('/api/export-sequence'), { method: 'POST', body: form });
+      const response = await fetch(apiUrl('/api/export-sequence'), { method: 'POST', body: form, headers: state.apiKey ? {'X-API-Key':state.apiKey} : {} });
       if (!response.ok) {let message='Sequence export failed. Check the backend and FFmpeg.';try{message=(await response.json()).detail||message;}catch{}throw new Error(message);}
       const blob = await response.blob(), url = URL.createObjectURL(blob), link = document.createElement('a');
       link.href=url;const ext=$('export-format').value;
@@ -310,7 +310,7 @@
     button.disabled=true;button.textContent='Transcribing…';note.textContent='Whisper is processing this clip. The first run may download the AI model.';
     try{
       const form=new FormData();form.append('file',clip.file,clip.name);form.append('language',$('ai-language').value);
-      const response=await fetch(apiUrl('/api/transcribe'),{method:'POST',body:form});
+      const response=await fetch(apiUrl('/api/transcribe'),{method:'POST',body:form,headers:state.apiKey?{'X-API-Key':state.apiKey}:{}});
       if(!response.ok){let message='AI transcription failed.';try{message=(await response.json()).detail||message;}catch{}throw new Error(message);}
       const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');
       link.href=url;link.download=clip.name.replace(/\.[^.]+$/,'')+'-captions.srt';link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
@@ -339,6 +339,10 @@
         return;
       }
     }
+    const enteredKey = prompt('Backend API key (leave blank only if your server does not require one):', state.apiKey);
+    if (enteredKey === null) return;
+    state.apiKey = enteredKey.trim();
+    localStorage.setItem('pvs_api_key', state.apiKey);
     state.apiBase = clean;
     localStorage.setItem('pvs_api_base', clean);
     await checkHealth();
