@@ -837,3 +837,11 @@ body.light-theme .project-chip,body.light-theme .director-controls label,body.li
  .media-panel{order:1;grid-column:auto;grid-row:auto}
  .tool-rail{order:0;grid-column:auto;grid-row:auto}
 }
+
+
+/* Keep the Media Library clean; open graphics presets from the Templates rail. */
+.graphics-presets{display:none}
+.audio-waveform{display:flex;align-items:center;justify-content:space-between;gap:1px;overflow:hidden}
+.audio-waveform i{display:block;flex:1;min-width:1px;max-height:100%;border-radius:2px;background:#24c6a3;opacity:.9}
+.caption-block{flex:1 1 0;min-width:85px}
+@media(max-width:760px){.graphics-presets{max-height:260px;overflow:auto}}
