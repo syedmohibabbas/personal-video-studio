@@ -9,20 +9,23 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>Personal Video Studio</span><span class="version">v0.6</span></a>
-    <div class="project-name"><i class="status-dot"></i><span id="project-name">Untitled Project</span><button class="rename-project-button" id="rename-project" type="button" title="Rename project" aria-label="Rename project">✎</button></div>
+    <a class="brand" href="#" aria-label="Personal Video Studio home"><span class="brand-mark">▶</span><span>Personal <b>Video Studio</b></span></a>
+    <span class="topbar-divider"></span>
+    <button class="project-chip" id="rename-project" type="button"><span class="project-clapper">▣</span><span id="project-name">Untitled Project</span><span class="chevron">⌄</span></button>
+    <span class="save-indicator"><i class="status-dot"></i><span id="save-status">All changes saved</span></span>
     <div class="top-actions">
-      <button class="button button-quiet" id="new-project">New</button>
-      <button class="button button-quiet" id="save-project">Save project</button>
-      <button class="button button-quiet" id="load-project">Open project</button>
-      <button class="button button-primary" id="export-button" disabled>Export sequence ↗</button>
+      <button class="top-icon" id="undo-button" type="button" disabled title="Undo history is not available yet" aria-label="Undo">↶</button>
+      <button class="top-icon" id="redo-button" type="button" disabled title="Redo history is not available yet" aria-label="Redo">↷</button>
+      <span class="topbar-divider"></span>
+      <button class="button button-primary" id="export-button" disabled><span>⇧</span> Export <span class="chevron">⌄</span></button>
+      <button class="top-icon theme-toggle" id="theme-toggle" type="button" title="Toggle interface brightness" aria-label="Toggle interface brightness">☼</button>
+      <button class="avatar-button" type="button" title="Personal Video Studio account">M</button>
+      <button class="legacy-action" id="new-project" type="button">New</button>
+      <button class="legacy-action" id="save-project" type="button">Save project</button>
+      <button class="legacy-action" id="load-project" type="button">Open project</button>
     </div>
   </header>
-  <nav class="app-menubar" aria-label="Application menu">
-    <div class="menu-items" role="menubar"><button type="button" data-app-menu="File">File</button><button type="button" data-app-menu="Edit">Edit</button><button type="button" data-app-menu="Clip">Clip</button><button type="button" data-app-menu="Sequence">Sequence</button><button type="button" data-app-menu="Markers">Markers</button><button type="button" data-app-menu="Graphics">Graphics</button><button type="button" data-app-menu="View">View</button><button type="button" data-app-menu="Window">Window</button><button type="button" data-app-menu="Help">Help</button></div>
-    <div class="workspace-switcher"><span class="workspace-label">WORKSPACE</span><button type="button" data-workspace="editing" class="workspace-active">Editing</button><button type="button" data-workspace="color">Color</button><button type="button" data-workspace="audio">Audio</button></div>
-  </nav>
-<div class="app-menu-popup" id="app-menu-popup" hidden role="menu"></div>
+  <nav class="app-menubar legacy-menubar" aria-label="Application menu" hidden><div class="menu-items"><button type="button" data-app-menu="File">File</button></div></nav><div class="app-menu-popup" id="app-menu-popup" hidden role="menu"></div>
 
   <main class="workspace">
     <aside class="tool-rail" aria-label="Main navigation">
@@ -33,14 +36,13 @@
       <button class="rail-tool" type="button" data-rail="settings" title="Settings"><span>⚙</span><small>Settings</small></button>
     </aside>
     <aside class="panel media-panel">
-      <div class="panel-heading"><div class="panel-title-wrap"><span class="eyebrow">PROJECT</span><h2>Project</h2></div><button class="panel-menu" type="button" aria-label="Project panel options">☰</button></div>
+      <div class="panel-heading"><div class="panel-title-wrap"><h2>Media Library</h2></div><div class="media-heading-actions"><button class="panel-menu" id="media-search" type="button" title="Search media">⌕</button><button class="panel-menu" id="media-filter" type="button" title="Filter media">▽</button></div></div>
       <button class="import-drop" id="video-drop">
-        <span class="upload-icon">↑</span><strong>Import videos</strong>
-        <small>Drop multiple videos or browse</small><span class="format-note">MP4 · MOV · WEBM · MKV</span>
+        <span class="upload-icon">↑</span><strong>Import Media</strong><span class="import-chevron">⌄</span><small>MP4 · MOV · WEBM · MKV</small>
       </button>
       <input id="video-input" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.webm,.mkv" multiple hidden>
-      <button class="import-audio" id="audio-import">＋ Add background audio</button>
-      <label class="audio-volume-control" for="audio-volume">MUSIC VOLUME <span id="audio-volume-value">35%</span><input id="audio-volume" type="range" min="0" max="100" value="35"></label>
+      <button class="import-audio legacy-audio-import" id="audio-import">＋ Add background audio</button>
+      <label class="audio-volume-control legacy-audio-volume" for="audio-volume">MUSIC VOLUME <span id="audio-volume-value">35%</span><input id="audio-volume" type="range" min="0" max="100" value="35"></label>
       <input id="audio-input" type="file" accept="audio/*" hidden>
       <div class="media-section-title"><span>PROJECT MEDIA</span><span id="media-count">0 ITEMS</span></div>
       <div id="media-list" class="media-list"><div class="empty-media"><span>▧</span><p>Your imported media<br>will appear here.</p></div></div>
@@ -71,10 +73,7 @@
 
     <section class="center-column">
       <section class="preview-panel panel">
-        <div class="panel-heading">
-          <div class="monitor-heading"><span class="eyebrow">PROGRAM MONITOR</span><h2>Program: Sequence 01</h2></div>
-          <div class="preview-meta"><button class="fullscreen-preview-button" id="fullscreen-preview" type="button" title="Full screen preview" aria-label="Open full screen preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg><span>Full screen</span></button></div>
-        </div>
+        <div class="monitor-heading"><span class="eyebrow">PROGRAM MONITOR</span></div>
         <div class="preview-stage aspect-landscape" id="preview-stage">
           <button class="fullscreen-close" id="fullscreen-close" type="button" title="Close full screen preview" aria-label="Close full screen preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
           <div class="preview-empty" id="preview-empty"><div class="play-emblem">▶</div><h3>Your story starts here.</h3><p>Import multiple videos to build a sequence.</p></div>
@@ -88,42 +87,54 @@
           </div>
         </div>
         <div class="transport">
+          <div class="timecode"><span id="current-time">00:00:00:00</span><span class="time-divider">/</span><span id="total-time">00:00:00:00</span></div>
           <div class="transport-left">
             <button class="transport-button" id="previous-clip" title="Previous clip">|◀</button>
-            <button class="transport-button seek-transport" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">
+            <button class="play-button" id="play-button" title="Play/Pause" aria-label="Play">▶</button>
+            <button class="transport-button" id="next-clip" title="Next clip">▶|</button>
+            <button class="transport-button seek-transport legacy-seek" id="seek-backward" type="button" title="Back 10 seconds" aria-label="Back 10 seconds">
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 12 7 12 7 2"/><path d="M8 12a17 17 0 1 1-1 17"/><path d="M7 12 17 12 17 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
             </button>
-            <button class="play-button" id="play-button" title="Play/Pause" aria-label="Play">▶</button>
-            <button class="transport-button seek-transport" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">
+            <button class="transport-button seek-transport legacy-seek" id="seek-forward" type="button" title="Forward 10 seconds" aria-label="Forward 10 seconds">
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 12h10V2"/><path d="M40 12a17 17 0 1 0 1 17"/><path d="M41 12 31 12 31 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
             </button>
-            <button class="transport-button" id="next-clip" title="Next clip">▶|</button>
-          </div>
-          <div class="timecode"><span id="current-time">00:00.00</span><span class="time-divider">/</span><span id="total-time">00:00.00</span></div>
+            </div>
           <div class="preview-right-controls">
-            <span class="preview-hint" id="preview-hint">SELECT A CLIP</span>
+            <button class="transport-button" id="mute-preview" type="button" title="Mute preview">◖</button><button class="transport-button" id="fullscreen-preview" type="button" title="Full screen preview">⛶</button>
             <div class="aspect-controls" role="group" aria-label="Preview aspect ratio">
-              <button class="aspect-button is-active" id="aspect-landscape" type="button" title="Landscape 16:9" aria-label="Landscape 16:9" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="1.5"/></svg></button>
-              <button class="aspect-button" id="aspect-portrait" type="button" title="Portrait 9:16" aria-label="Portrait 9:16" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="1.5"/></svg></button>
+              <button class="aspect-button is-active" id="aspect-landscape" type="button" title="Landscape 16:9" aria-label="Landscape 16:9" aria-pressed="true">16:9</button><button class="aspect-button" id="aspect-portrait" type="button" title="Portrait 9:16" aria-label="Portrait 9:16" aria-pressed="false">9:16</button>
             </div>
           </div>
         </div>
       </section>
 
       <section class="timeline-panel panel">
-        <div class="panel-heading">
-          <div><span class="eyebrow">SEQUENCE 01</span><h2>Timeline</h2></div>
-          <div class="timeline-tools"><span class="timeline-scale" id="sequence-duration">00:00 TOTAL</span><button class="icon-button small" id="fit-timeline" title="Fit timeline">⌗</button></div>
+        <div class="timeline-toolbar">
+          <div class="timeline-tool-group">
+            <button class="timeline-action" id="timeline-undo" disabled title="Undo unavailable">↶</button><button class="timeline-action" id="timeline-redo" disabled title="Redo unavailable">↷</button><i></i>
+            <button class="timeline-action" id="cut-clip" title="Split clip at playhead">✂ <span>Cut</span></button>
+            <button class="timeline-action" id="timeline-trim" title="Apply trim points">◩ <span>Trim</span></button>
+            <button class="timeline-action" id="timeline-delete" title="Delete selected clip">▤ <span>Delete</span></button><i></i>
+            <button class="timeline-action" id="timeline-speed" title="Open speed controls">◴ <span>Speed</span>⌄</button>
+            <button class="timeline-action" id="timeline-effects" title="Open effect controls">✦ <span>Effects</span></button>
+            <button class="timeline-action" id="timeline-transitions" title="Transition controls">◀▶ <span>Transitions</span></button>
+            <button class="timeline-action" id="timeline-color" title="Open color controls">◉ <span>Color</span></button>
+            <button class="timeline-action" id="timeline-more" title="More editing tools">More ⌄</button>
+          </div>
+          <div class="timeline-zoom"><button id="zoom-out" title="Zoom out">⌕</button><input id="timeline-zoom" type="range" min="50" max="150" value="100"><button id="zoom-in" title="Zoom in">⌕</button><button id="timeline-fullscreen" title="Fit timeline">⛶</button></div>
         </div>
-        <div class="track-label">VIDEO SEQUENCE <span>Drag clips left or right to reorder your sequence.</span></div>
-        <div class="timeline-tracks"><div class="track video-track" id="video-track"><div class="track-placeholder" id="track-placeholder">Import videos to create your sequence</div><div id="timeline-clips" class="timeline-clips"></div></div>
-          <div class="track audio-track"><span class="audio-placeholder">♫ BACKGROUND AUDIO</span><span id="audio-track-name"></span></div></div>
-        <div class="timeline-footer"><span><i class="legend-dot video-dot"></i> Video clips</span><span><i class="legend-dot audio-dot"></i> Audio bed</span><span id="timeline-status">No clips loaded</span></div>
+        <div class="timeline-ruler"><span>00:00:00</span><span>00:00:15</span><span>00:00:30</span><span>00:00:45</span><span>00:01:00</span><span>00:01:15</span></div>
+        <div class="timeline-tracks">
+          <div class="track-row"><div class="track-name"><span>▣</span> Video 1 <button title="Toggle video visibility">◉</button><button title="Lock video track">♙</button></div><div class="track video-track" id="video-track"><div class="track-placeholder" id="track-placeholder">Import videos to create your sequence</div><div id="timeline-clips" class="timeline-clips"></div><div class="timeline-playhead" id="timeline-playhead"></div></div></div>
+          <div class="track-row"><div class="track-name"><span>◖</span> Audio 1 <button title="Toggle audio visibility">◉</button><button title="Lock audio track">♙</button></div><div class="track audio-track"><span class="audio-placeholder">♫ BACKGROUND AUDIO</span><span id="audio-track-name"></span><div class="audio-waveform" id="audio-waveform"></div></div></div>
+          <div class="track-row"><div class="track-name"><span>CC</span> Captions <button title="Toggle captions visibility">◉</button><button title="Lock captions track">♙</button></div><div class="track captions-track" id="captions-track"><div class="caption-block">Captions appear here</div></div></div>
+        </div>
+        <div class="timeline-footer"><span id="sequence-duration">00:00 TOTAL</span><span id="timeline-status">No clips loaded</span><button class="timeline-action" id="fit-timeline" title="Fit timeline">Fit</button></div>
       </section>
     </section>
 
     <aside class="right-column">
-      <section class="panel inspector-panel">
+      <section class="panel inspector-panel inspector-drawer" id="inspector-drawer" hidden>
         <div class="panel-heading"><div><span class="eyebrow">SELECTED CLIP</span><h2>Effect Controls</h2></div><button class="panel-menu" type="button" aria-label="Effect Controls panel options">☰</button></div>
         <div class="inspector-empty" id="inspector-empty"><span>◈</span><p>Select a clip in your media<br>library to inspect it.</p></div>
         <div id="inspector-content" hidden>
@@ -177,7 +188,7 @@
       </section>
 
       <section class="panel director-panel">
-        <div class="director-top"><div><span class="eyebrow">CREATIVE ASSISTANT</span><h2>✦ AI Director</h2></div><button class="director-collapse" type="button" aria-label="Collapse AI Director">⌃</button></div>
+        <div class="director-top"><div><h2>✦ AI Director <span class="beta-pill">Beta</span></h2></div><button class="director-collapse" type="button" aria-label="Collapse AI Director">⌃</button></div>
         <button class="analyze-footage-button" id="analyze-footage" type="button"><span>✦</span> Analyze Footage</button>
         <div class="analysis-result" id="analysis-result" aria-live="polite"><div class="analysis-empty"><span>✧</span><p>Select a clip and analyze its technical properties.</p></div></div>
         <div class="director-controls">
