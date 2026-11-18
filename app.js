@@ -398,7 +398,9 @@
   $('play-button').onclick=()=>{const c=selected();if(!c)return toast('Import and select a clip first.');if(video.paused){if(video.currentTime<c.start||video.currentTime>=c.end)video.currentTime=c.start;video.play().catch(()=>toast('Playback could not start.'));if(state.audioFile){state.audio.currentTime=Math.max(0,video.currentTime-c.start);state.audio.play().catch(()=>{});}}else{video.pause();state.audio.pause();}};
   function syncPlaybackButtons(){
     const icon=video.paused?'▶':'Ⅱ',label=video.paused?'Play':'Pause';
-    $('play-button').textContent=icon;
+    $('play-button').classList.toggle('is-playing',!video.paused);
+    $('play-button').setAttribute('aria-label',label);
+    $('play-button').title=label;
     $('overlay-play-button').title=label;$('overlay-play-button').setAttribute('aria-label',label);
     $('preview-stage').classList.toggle('is-playing',!video.paused);
   }
