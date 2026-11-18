@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null };
+  const state = { clips: [], selectedId: null, projectName: 'Untitled Project', previewAspect: 'landscape', audioFile: null, audioUrl: null, audio: new Audio(), audioVolume: 0.35, draggingId: null, apiBase: localStorage.getItem('pvs_api_base') || '', backendOnline: false, exporting: false, capabilities: null, toastTimer: null, pendingProject: null, activePreset: null };
   const video = $('video-preview');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
   const fmt = s => { s = Number.isFinite(s) && s > 0 ? s : 0; return `${String(Math.floor(s/60)).padStart(2,'0')}:${(s%60).toFixed(2).padStart(5,'0')}`; };
@@ -88,7 +88,7 @@
     probe.onloadedmetadata=()=>{
       const duration=Number.isFinite(probe.duration)?probe.duration:0;
       const saved=state.pendingProject?.clips?.find(x=>x.name===file.name && !state.clips.some(y=>y.name===x.name && y._restored));
-      const c={id:uid(),file,url,name:file.name,duration,scale:Number(saved?.scale)||1,rotation:Number(saved?.rotation)||0,x:Number(saved?.x)||0,y:Number(saved?.y)||0,opacity:Number.isFinite(Number(saved?.opacity))?Number(saved.opacity):1,speed:Number(saved?.speed)||1,volume:Number.isFinite(Number(saved?.volume))?Number(saved.volume):1,fadeIn:Number(saved?.fadeIn)||0,fadeOut:Number(saved?.fadeOut)||0,brightness:Number(saved?.brightness)||0,contrast:Number(saved?.contrast)||1,saturation:Number.isFinite(Number(saved?.saturation))?Number(saved.saturation):1,start:saved?Math.max(0,Math.min(Number(saved.start)||0,duration)):0,end:saved?Math.max(0,Math.min(Number(saved.end)||duration,duration)):duration,width:probe.videoWidth,height:probe.videoHeight,_restored:!!saved};
+      const c={id:uid(),file,url,name:file.name,duration,scale:Number(saved?.scale)||1,rotation:Number(saved?.rotation)||0,x:Number(saved?.x)||0,y:Number(saved?.y)||0,opacity:Number.isFinite(Number(saved?.opacity))?Number(saved.opacity):1,speed:Number(saved?.speed)||1,volume:Number.isFinite(Number(saved?.volume))?Number(saved.volume):1,fadeIn:Number(saved?.fadeIn)||0,fadeOut:Number(saved?.fadeOut)||0,brightness:Number(saved?.brightness)||0,contrast:Number(saved?.contrast)||1,saturation:Number.isFinite(Number(saved?.saturation))?Number(saved.saturation):1,graphic:saved?.graphic&&typeof saved.graphic==='object'?saved.graphic:null,start:saved?Math.max(0,Math.min(Number(saved.start)||0,duration)):0,end:saved?Math.max(0,Math.min(Number(saved.end)||duration,duration)):duration,width:probe.videoWidth,height:probe.videoHeight,_restored:!!saved};
       if(c.end<=c.start)c.end=duration;
       state.clips.push(c); state.selectedId=c.id; selectClip(c.id); render(); toast(`${file.name} added to sequence.`);
       probe.removeAttribute('src');
@@ -106,12 +106,49 @@
     const i=state.clips.findIndex(c=>c.id===id), j=i+delta; if(i<0||j<0||j>=state.clips.length)return;
     [state.clips[i],state.clips[j]]=[state.clips[j],state.clips[i]]; render();
   }
+  const graphicPresets = {
+    'caption-pop':{label:'CAPTION POP',className:'caption-pop',position:'bottom'},
+    'caption-box':{label:'CLEAN CAPTION',className:'caption-box',position:'bottom'},
+    karaoke:{label:'KARAOKE',className:'karaoke',position:'bottom'},
+    'title-bold':{label:'BOLD TITLE',className:'title-bold',position:'center'},
+    'title-cinematic':{label:'CINEMATIC',className:'title-cinematic',position:'center'},
+    'lower-third':{label:'LOWER THIRD',className:'lower-third',position:'lower'},
+    news:{label:'NEWS BAR',className:'news',position:'lower'},
+    intro:{label:'INTRO REVEAL',className:'intro',position:'center'},
+    outro:{label:'OUTRO CARD',className:'outro',position:'center'},
+    neon:{label:'NEON',className:'neon',position:'center'},
+    minimal:{label:'MINIMAL',className:'minimal',position:'center'},
+    stinger:{label:'STINGER',className:'stinger',position:'upper'}
+  };
+  function renderGraphic(){
+    const el=$('graphic-overlay'),c=selected(),g=c?.graphic;
+    if(!el)return;
+    if(!g||!g.text){el.hidden=true;el.className='graphic-overlay';el.textContent='';return;}
+    const preset=graphicPresets[g.preset]||graphicPresets['caption-pop'];
+    el.hidden=false;el.className='graphic-overlay '+preset.className+' position-'+preset.position;
+    el.textContent=g.text;
+  }
+  function applyGraphic(){
+    const c=selected();if(!c){toast('Import and select a clip first.');return;}
+    const preset=state.activePreset||'caption-pop',text=$('graphic-text').value.trim();
+    if(!text){toast('Enter title or caption text first.');$('graphic-text').focus();return;}
+    c.graphic={preset,text};renderGraphic();toast((graphicPresets[preset]?.label||'Graphic')+' applied to preview.');
+  }
+  document.querySelectorAll('[data-preset]').forEach(button=>button.addEventListener('click',()=>{
+    state.activePreset=button.dataset.preset;
+    document.querySelectorAll('[data-preset]').forEach(b=>b.classList.toggle('active',b===button));
+    const defaults={'caption-pop':'Your caption here','caption-box':'Your caption here',karaoke:'Follow the rhythm','title-bold':'YOUR TITLE','title-cinematic':'A NEW STORY','lower-third':'Your Name  |  Creator','news':'BREAKING NEWS','intro':'WELCOME','outro':'THANK YOU FOR WATCHING',neon:'MAKE IT GLOW',minimal:'A LITTLE MOMENT',stinger:'LET’S GO'};
+    $('graphic-text').value=defaults[state.activePreset]||'Your title';applyGraphic();
+  }));
+  $('apply-graphic').onclick=applyGraphic;
+  $('remove-graphic').onclick=()=>{const c=selected();if(!c)return;c.graphic=null;renderGraphic();toast('Graphic removed from this clip.');};
   function applyPreviewAdjustments(){
     const c=selected();if(!c)return;
     video.style.transform=`translate(${c.x||0}px,${c.y||0}px) scale(${c.scale||1}) rotate(${c.rotation||0}deg)`;
     video.style.opacity=String(c.opacity??1);
     video.style.filter=`brightness(${1+(c.brightness||0)}) contrast(${c.contrast||1}) saturate(${c.saturation??1})`;
     video.playbackRate=c.speed||1;video.volume=Math.max(0,Math.min(1,c.volume??1));
+    renderGraphic();
   }
   function applyTrim() {
     const c=selected(); if(!c)return;
@@ -120,7 +157,7 @@
     c.start=a;c.end=b; if(state.clips.length)selectClip(c.id); render(); toast('Trim points applied.');
   }
   function saveProject() {
-    const data={format:'PVS_PROJECT',version:'0.5.0',projectName:state.projectName,previewAspect:state.previewAspect,audioVolume:state.audioVolume,clips:state.clips.map(c=>({name:c.name,duration:c.duration,start:c.start,end:c.end,width:c.width,height:c.height,scale:c.scale,rotation:c.rotation,x:c.x,y:c.y,opacity:c.opacity,speed:c.speed,volume:c.volume,fadeIn:c.fadeIn,fadeOut:c.fadeOut,brightness:c.brightness,contrast:c.contrast,saturation:c.saturation})),audioName:state.audioFile?.name||null};
+    const data={format:'PVS_PROJECT',version:'0.6.0',projectName:state.projectName,previewAspect:state.previewAspect,audioVolume:state.audioVolume,clips:state.clips.map(c=>({name:c.name,duration:c.duration,start:c.start,end:c.end,width:c.width,height:c.height,scale:c.scale,rotation:c.rotation,x:c.x,y:c.y,opacity:c.opacity,speed:c.speed,volume:c.volume,fadeIn:c.fadeIn,fadeOut:c.fadeOut,brightness:c.brightness,contrast:c.contrast,saturation:c.saturation,graphic:c.graphic||null})),audioName:state.audioFile?.name||null};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=url;a.download=(state.projectName.trim().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'personal-video-studio')+'.pvsproject';a.click();URL.revokeObjectURL(url);
     toast('Project settings saved. Re-import the source media when reopening.');
