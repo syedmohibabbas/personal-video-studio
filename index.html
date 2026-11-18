@@ -99,7 +99,7 @@
               <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M31 12h10V2"/><path d="M40 12a17 17 0 1 0 1 17"/><path d="M41 12 31 12 31 22"/><text x="24" y="29" text-anchor="middle">10</text></svg>
             </button>
             </div>
-          <div class="preview-right-controls">
+          <div class="preview-right-controls"><span id="preview-hint" hidden></span>
             <button class="transport-button" id="mute-preview" type="button" title="Mute preview">◖</button><button class="transport-button" id="fullscreen-preview" type="button" title="Full screen preview">⛶</button>
             <div class="aspect-controls" role="group" aria-label="Preview aspect ratio">
               <button class="aspect-button is-active" id="aspect-landscape" type="button" title="Landscape 16:9" aria-label="Landscape 16:9" aria-pressed="true">16:9</button><button class="aspect-button" id="aspect-portrait" type="button" title="Portrait 9:16" aria-label="Portrait 9:16" aria-pressed="false">9:16</button>
@@ -188,7 +188,7 @@
       </section>
 
       <section class="panel director-panel">
-        <div class="director-top"><div><h2>✦ AI Director <span class="beta-pill">Beta</span></h2></div><button class="director-collapse" type="button" aria-label="Collapse AI Director">⌃</button></div>
+        <div class="director-top"><div><h2>✦ AI Director <span class="beta-pill">Beta</span></h2></div><button class="director-collapse" id="director-collapse" type="button" aria-label="Collapse AI Director">⌃</button></div>
         <button class="analyze-footage-button" id="analyze-footage" type="button"><span>✦</span> Analyze Footage</button>
         <div class="analysis-result" id="analysis-result" aria-live="polite"><div class="analysis-empty"><span>✧</span><p>Select a clip and analyze its technical properties.</p></div></div>
         <div class="director-controls">
