@@ -2,7 +2,7 @@ from __future__ import annotations
 import json, os, shutil, subprocess, tempfile, threading
 from pathlib import Path
 from typing import Annotated
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
@@ -14,6 +14,11 @@ MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024
 ALLOWED_EXTENSIONS = {'.mp4', '.mov', '.webm', '.mkv'}
 app = FastAPI(title='Personal Video Studio API', version='0.6.0')
 app.add_middleware(CORSMiddleware, allow_origins=['https://syedmohibabbas.github.io'], allow_origin_regex=r'https?://(localhost|127\.0\.0\.1)(:\d+)?', allow_credentials=False, allow_methods=['GET','POST'], allow_headers=['*'])
+
+def require_api_key(x_api_key: Annotated[str | None, Header()] = None):
+    expected = os.getenv('PVS_API_KEY', '').strip()
+    if expected and x_api_key != expected:
+        raise HTTPException(401, 'Backend API key is missing or incorrect.')
 
 def tool(name: str): return shutil.which(name)
 def require_tools():
@@ -88,7 +93,7 @@ def ai_status():
             'device': WHISPER_DEVICE, 'model_loaded': _whisper_model is not None,
             'first_run_download': installed and _whisper_model is None}
 
-@app.post('/api/transcribe')
+@app.post('/api/transcribe' , dependencies=[Depends(require_api_key)])
 async def transcribe(file: Annotated[UploadFile, File()],
                      language: Annotated[str, Form()] = 'auto'):
     if Path(file.filename or '').suffix.lower() not in ALLOWED_EXTENSIONS:
@@ -127,7 +132,7 @@ def capabilities():
     }
     return {'formats': formats, 'resolutions': ['source', '720', '1080', '1440', '2160']}
 
-@app.post('/api/analyze')
+@app.post('/api/analyze' , dependencies=[Depends(require_api_key)])
 async def analyze(file: Annotated[UploadFile, File()]):
     _, ffprobe = require_tools()
     with tempfile.TemporaryDirectory(prefix='pvs-analyze-') as td:
@@ -139,7 +144,7 @@ async def analyze(file: Annotated[UploadFile, File()]):
         fmt = data.get('format',{})
         return {'filename':file.filename,'duration':float(fmt.get('duration') or 0),'format':fmt.get('format_name'),'width':stream.get('width'),'height':stream.get('height'),'frame_rate':stream.get('avg_frame_rate')}
 
-@app.post('/api/export')
+@app.post('/api/export' , dependencies=[Depends(require_api_key)])
 async def export_video(file: Annotated[UploadFile, File()], start: Annotated[float, Form()], end: Annotated[float, Form()]):
     ffmpeg, _ = require_tools()
     if start < 0 or end <= start: raise HTTPException(400, 'Invalid trim range.')
@@ -154,7 +159,7 @@ async def export_video(file: Annotated[UploadFile, File()], start: Annotated[flo
         raise
 
 
-@app.post('/api/export-sequence')
+@app.post('/api/export-sequence' , dependencies=[Depends(require_api_key)])
 async def export_sequence(
     files: Annotated[list[UploadFile], File()],
     edits: Annotated[str, Form()],
