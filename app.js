@@ -301,6 +301,26 @@
     if(output){const suffix=key==='scale'||key==='opacity'||key==='volume'?'%':key==='rotation'?'°':key==='speed'?'×':'';output.textContent=key==='speed'?raw.toFixed(2)+suffix:key==='brightness'||key==='contrast'||key==='saturation'?raw.toFixed(2):raw+suffix;}
     applyPreviewAdjustments();
   }));
+
+  async function generateAiCaptions(){
+    const clip=selected();
+    if(!clip){toast('Select a video clip first.');return;}
+    if(!state.backendOnline){toast('Connect the AI backend first.');return;}
+    const button=$('ai-transcribe'),note=$('ai-status-note');
+    button.disabled=true;button.textContent='Transcribing…';note.textContent='Whisper is processing this clip. The first run may download the AI model.';
+    try{
+      const form=new FormData();form.append('file',clip.file,clip.name);form.append('language',$('ai-language').value);
+      const response=await fetch(apiUrl('/api/transcribe'),{method:'POST',body:form});
+      if(!response.ok){let message='AI transcription failed.';try{message=(await response.json()).detail||message;}catch{}throw new Error(message);}
+      const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download=clip.name.replace(/\.[^.]+$/,'')+'-captions.srt';link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      const detected=response.headers.get('X-Detected-Language')||'unknown',count=response.headers.get('X-Segment-Count')||'';
+      note.textContent='Captions ready · detected language: '+detected+' · '+count+' subtitle lines.';
+      toast('AI captions downloaded as an SRT subtitle file.');
+    }catch(error){note.textContent=error.message||'AI transcription failed.';toast(note.textContent);}
+    finally{button.disabled=false;button.textContent='Generate AI captions (.SRT)';}
+  }
+  $('ai-transcribe').onclick=generateAiCaptions;
   $('reset-inspector').onclick=()=>{const c=selected();if(!c)return;Object.assign(c,{scale:1,rotation:0,x:0,y:0,opacity:1,speed:1,volume:1,fadeIn:0,fadeOut:0,brightness:0,contrast:1,saturation:1});updateInspector();applyPreviewAdjustments();toast('Clip adjustments reset.');};
   $('apply-trim').onclick=applyTrim;$('remove-clip').onclick=()=>{const c=selected();if(c)removeClip(c.id);};
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
