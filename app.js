@@ -363,7 +363,12 @@
   $('reset-inspector').onclick=()=>{const c=selected();if(!c)return;Object.assign(c,{scale:1,rotation:0,x:0,y:0,opacity:1,speed:1,volume:1,fadeIn:0,fadeOut:0,brightness:0,contrast:1,saturation:1});updateInspector();applyPreviewAdjustments();toast('Clip adjustments reset.');};
   $('apply-trim').onclick=applyTrim;$('remove-clip').onclick=()=>{const c=selected();if(c)removeClip(c.id);};
   $('move-left').onclick=()=>{const c=selected();if(c)moveClip(c.id,-1);};$('move-right').onclick=()=>{const c=selected();if(c)moveClip(c.id,1);};
-  $('export-button').onclick=openExportDialog;$('export-start').onclick=exportSequence;$('export-close').onclick=closeExportDialog;$('export-cancel').onclick=closeExportDialog;$('export-dialog').addEventListener('click',e=>{if(e.target===$('export-dialog'))closeExportDialog();});$('save-project').onclick=saveProject;
+  $('export-button').onclick=openExportDialog;
+  $('project-menu').onclick=()=>{$('project-menu-popup').hidden=!$('project-menu-popup').hidden;};
+  $('project-new-action').onclick=()=>{$('project-menu-popup').hidden=true;$('new-project').click();};
+  $('project-open-action').onclick=()=>{$('project-menu-popup').hidden=true;$('load-project').click();};
+  $('project-save-action').onclick=()=>{$('project-menu-popup').hidden=true;saveProject();};
+  document.addEventListener('click',event=>{if(!event.target.closest('.project-control'))$('project-menu-popup').hidden=true;});$('export-start').onclick=exportSequence;$('export-close').onclick=closeExportDialog;$('export-cancel').onclick=closeExportDialog;$('export-dialog').addEventListener('click',e=>{if(e.target===$('export-dialog'))closeExportDialog();});$('save-project').onclick=saveProject;
   async function connectBackend() {
     const entered = prompt('Paste your FastAPI backend base URL (example: https://your-api.example.com). Leave blank to use same-origin hosting:', state.apiBase);
     if (entered === null) return;
