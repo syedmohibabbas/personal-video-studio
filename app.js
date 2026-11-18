@@ -471,3 +471,39 @@
   });
   checkHealth();render();
 })();
+  // Main navigation rail: every item routes to an existing, meaningful action.
+  document.querySelectorAll('[data-rail]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('[data-rail]').forEach(b=>b.classList.toggle('active',b===button));
+    const route=button.dataset.rail;
+    if(route==='projects'){$('load-project').click();return;}
+    if(route==='media'){$('video-input').click();return;}
+    if(route==='templates'){document.querySelector('.graphics-presets').scrollIntoView({behavior:'smooth',block:'center'});return;}
+    if(route==='settings'){$('backend-connect').click();return;}
+    document.querySelector('.preview-panel').scrollIntoView({behavior:'smooth',block:'center'});
+  }));
+  $('director-collapse').onclick=()=>{
+    const panel=$('director-collapse').closest('.director-panel');
+    panel.classList.toggle('director-minimized');
+    $('director-collapse').textContent=panel.classList.contains('director-minimized')?'⌄':'⌃';
+  };
+  $('analyze-footage').onclick=async()=>{
+    const clip=selected();
+    if(!clip){toast('Import and select a clip before analysis.');return;}
+    if(!state.backendOnline){toast('Connect the FFmpeg backend to analyze clip metadata.');$('backend-connect').click();return;}
+    const button=$('analyze-footage'),result=$('analysis-result');
+    button.disabled=true;button.innerHTML='<span>✦</span> Analyzing…';
+    result.innerHTML='<div class="analysis-empty"><span>◌</span><p>Reading video metadata…</p></div>';
+    try{
+      const form=new FormData();form.append('file',clip.file,clip.name);
+      const response=await fetch(apiUrl('/api/analyze'),{method:'POST',body:form,headers:state.apiKey?{'X-API-Key':state.apiKey}:{}});
+      if(!response.ok){let message='Analysis failed.';try{message=(await response.json()).detail||message;}catch{}throw new Error(message);}
+      const data=await response.json();
+      const duration=Number(data.duration||clip.duration);
+      result.innerHTML='<div class="analysis-summary"><span class="analysis-check">●</span><div><b>Clip analysis complete</b><br>Technical metadata detected for '+esc(clip.name)+'.</div></div><div class="analysis-metrics"><div><small>Duration</small><b>'+esc(short(duration))+'</b></div><div><small>Resolution</small><b>'+esc((data.width||'—')+' × '+(data.height||'—'))+'</b></div><div><small>Frame rate</small><b>'+esc(data.frame_rate||'—')+'</b></div><div><small>Format</small><b>'+esc(data.format||'—')+'</b></div></div>';
+      toast('Clip metadata analysis complete.');
+    }catch(error){result.innerHTML='<div class="analysis-empty"><span>!</span><p>'+esc(error.message||'Analysis failed.')+'</p></div>';toast('Could not analyze this clip.');}
+    finally{button.disabled=false;button.innerHTML='<span>✦</span> Analyze Footage';}
+  };
+  $('director-pacing').oninput=e=>{ $('director-pacing-mode').dataset.level=e.target.value; };
+  $('director-color').oninput=e=>{ $('director-color-mode').dataset.level=e.target.value; };
+  $('director-audio').oninput=e=>{ $('director-audio-mode').dataset.level=e.target.value; };
