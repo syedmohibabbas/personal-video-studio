@@ -50,3 +50,12 @@ Python 3.10+, FFmpeg and FFprobe on PATH, modern desktop browser. For the Docker
 - `POST /api/export-sequence` — sequence render with per-clip adjustments and optional background audio
 
 Never commit API keys or `.env` files. Do not send private footage to cloud services without consent.
+
+## Deploy the backend on Render (free tier)
+1. Open the Render Blueprint flow and select this GitHub repository: https://github.com/syedmohibabbas/personal-video-studio
+2. Render detects `render.yaml`. Review the service and keep the plan set to **Free** before applying.
+3. Render builds the Dockerfile, installs FFmpeg/FFprobe and starts FastAPI. The health check is `/api/health`.
+4. After deployment, copy the service's public `https://...onrender.com` URL. In the editor choose **Connect engine**, paste that URL, then paste the generated `PVS_API_KEY` value from the Render service environment.
+5. The blueprint auto-deploys future commits from `main`.
+
+**Free-tier caveats:** the service can sleep when idle and the first request may take time to wake it. Its filesystem is ephemeral, so the Whisper model may need to download again after a restart. The blueprint uses the smaller `tiny` Whisper model to reduce memory use, but AI transcription may still exceed free-instance memory or time limits. Large video exports are not reliable on a free instance. Do not store private media or rely on this service for permanent files. No paid plan is selected by this blueprint.
