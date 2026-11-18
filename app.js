@@ -100,17 +100,19 @@
   }
   async function addVideo(file) {
     if(!file)return;
-    if(!/\.(mp4|mov|webm|mkv)$/i.test(file.name)){toast(`Skipped unsupported file: ${file.name}`);return;}
-    const url=URL.createObjectURL(file), probe=document.createElement('video'); probe.preload='metadata'; probe.src=url;
+    if(!/\.(mp4|mov|webm|mkv|m4v)$/i.test(file.name)){toast(`Unsupported video format: ${file.name}. Use MP4, MOV, WEBM, MKV or M4V.`);return;}
+    const url=URL.createObjectURL(file), probe=document.createElement('video'); probe.preload='metadata';
     probe.onloadedmetadata=()=>{
       const duration=Number.isFinite(probe.duration)?probe.duration:0;
+      if(!duration || !probe.videoWidth || !probe.videoHeight){URL.revokeObjectURL(url);toast(`Could not read video metadata: ${file.name}`);return;}
       const saved=state.pendingProject?.clips?.find(x=>x.name===file.name && !state.clips.some(y=>y.name===x.name && y._restored));
       const c={id:uid(),file,url,name:file.name,duration,scale:Number(saved?.scale)||1,rotation:Number(saved?.rotation)||0,x:Number(saved?.x)||0,y:Number(saved?.y)||0,opacity:Number.isFinite(Number(saved?.opacity))?Number(saved.opacity):1,speed:Number(saved?.speed)||1,volume:Number.isFinite(Number(saved?.volume))?Number(saved.volume):1,fadeIn:Number(saved?.fadeIn)||0,fadeOut:Number(saved?.fadeOut)||0,brightness:Number(saved?.brightness)||0,contrast:Number(saved?.contrast)||1,saturation:Number.isFinite(Number(saved?.saturation))?Number(saved.saturation):1,graphic:saved?.graphic&&typeof saved.graphic==='object'?saved.graphic:null,start:saved?Math.max(0,Math.min(Number(saved.start)||0,duration)):0,end:saved?Math.max(0,Math.min(Number(saved.end)||duration,duration)):duration,width:probe.videoWidth,height:probe.videoHeight,_restored:!!saved};
       if(c.end<=c.start)c.end=duration;
       state.clips.push(c); state.selectedId=c.id; selectClip(c.id); render(); toast(`${file.name} added to sequence.`);
       try{probe.currentTime=Math.min(1,Math.max(.1,duration*.15));probe.onseeked=()=>{try{const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;canvas.getContext('2d').drawImage(probe,0,0,320,180);c.poster=canvas.toDataURL('image/jpeg',.72);render();}catch{}probe.removeAttribute('src');};}catch{probe.removeAttribute('src');}
     };
-    probe.onerror=()=>{URL.revokeObjectURL(url);toast(`Could not read ${file.name}.`);};
+    probe.onerror=()=>{URL.revokeObjectURL(url);toast(`This browser could not decode ${file.name}. Try an MP4 (H.264) video.`);};
+    probe.src=url;
   }
   function removeClip(id) {
     const i=state.clips.findIndex(c=>c.id===id); if(i<0)return;
@@ -266,7 +268,7 @@
     state.projectName = clean; render(); toast('Project renamed.');
   };
 
-  $('video-drop').onclick=()=>$('video-input').click();
+  $('video-drop').onclick=event=>{event.preventDefault();$('video-input').click();};
   $('video-input').onchange=async e=>{for(const f of Array.from(e.target.files||[]))await addVideo(f);e.target.value='';};
   $('video-drop').ondragover=e=>{e.preventDefault();$('video-drop').classList.add('dragging');};
   $('video-drop').ondragleave=()=>$('video-drop').classList.remove('dragging');
