@@ -2,6 +2,11 @@
 
 A local-first browser video editing workspace with multi-clip sequencing, a clip Inspector, and a FastAPI + FFmpeg sequence renderer.
 
+## Interface refresh
+- Desktop editing workspace inspired by professional nonlinear editors: Project panel on the left, Program Monitor in the center, Effect Controls on the right, and a full-width Timeline below.
+- Compact application menu and workspace strip, neutral charcoal panel styling, restrained blue selection accents, and denser controls.
+- Responsive tablet and mobile layouts. Existing editing controls and project/export workflows are retained.
+
 ## v0.5 features
 - Clip Inspector: trim in/out, scale, rotation, X/Y position, opacity, playback speed, fade in/out, clip volume, brightness, contrast, and saturation.
 - Inspector adjustments are saved in project files and restored when the source media is re-imported.
