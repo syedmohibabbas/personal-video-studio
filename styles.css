@@ -808,3 +808,32 @@ body.light-theme .project-chip,body.light-theme .director-controls label,body.li
  .timeline-panel{order:4;min-height:260px}.timeline-toolbar{overflow-x:auto}.timeline-tool-group{min-width:max-content}.timeline-zoom{display:none}.timeline-ruler{padding-left:115px}.track-row{grid-template-columns:110px minmax(0,1fr)}
  .graphics-presets{max-height:230px}
 }
+
+
+/* Grid placement correction: the monitor and timeline are independent workspace panes. */
+.center-column{display:contents!important}
+.preview-panel{grid-column:3;grid-row:1;min-width:0;min-height:0}
+.timeline-panel{grid-column:1/5;grid-row:2}
+.right-column{grid-column:4;grid-row:1}
+.media-panel{grid-column:2;grid-row:1}
+.tool-rail{grid-column:1;grid-row:1}
+.sequence-clip{background-size:cover;background-position:center}
+.track-row.track-muted .track{opacity:.22}
+.track-row.track-locked .track{filter:saturate(.45)}
+.audio-track #audio-track-name.has-audio{color:#c2fff0}
+.audio-placeholder:has(+ #audio-track-name.has-audio){display:none}
+.import-audio{display:block!important;margin-top:6px;padding:5px 8px;border:1px solid #343b54;border-radius:6px;background:#202438;color:#bdb2ed;font-size:10px;text-align:left}
+.audio-volume-control{display:none!important}
+.caption-empty{opacity:.45}
+.timeline-panel .track-name button:hover{color:#fff}
+@media(max-width:1350px) and (min-width:761px){
+ .workspace{grid-template-columns:70px 245px minmax(360px,1fr) 310px}
+}
+@media(max-width:760px){
+ .center-column{display:contents!important}
+ .preview-panel{order:2;grid-column:auto;grid-row:auto}
+ .timeline-panel{order:4;grid-column:auto;grid-row:auto}
+ .right-column{order:3;grid-column:auto;grid-row:auto}
+ .media-panel{order:1;grid-column:auto;grid-row:auto}
+ .tool-rail{order:0;grid-column:auto;grid-row:auto}
+}
